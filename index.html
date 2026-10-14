@@ -1,47 +1,482 @@
+ 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Transpo PRO Tanger</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<style>.zellij{height:18px;background:linear-gradient(90deg,#d4af37,#f9e076,#d4af37);display:flex;align-items:center;justify-content:center}.zellij:before{content:"◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈";font-size:8px}.bus-pin{width:34px;height:44px;background:var(--c);border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2px solid white}.bus-pin i{transform:rotate(45deg);color:white}.bus-label{position:absolute;left:28px;top:-6px;background:var(--c);color:white;font-size:10px;font-weight:900;padding:3px 8px;border-radius:999px;transform:rotate(45deg)}.flag{width:54px;height:54px;border-radius:50%;border:2px solid #d4af37;display:flex;align-items:center;justify-content:center;font-size:24px}.flag.active{box-shadow:0 0 0 3px #d4af37}.route-card{background:#1e1e22;border-radius:14px;padding:12px;display:flex;gap:10px;border-left:4px solid var(--c);margin-bottom:8px}.tab{display:none}.tab.active{display:block}.navbtn.active{color:#d4af37}.navbtn.active.dot{display:block}</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Transpo PRO Tanger</title>
+
+  <!-- Leaflet CSS & JS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome -->
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    rel="stylesheet"
+  />
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@700;900&family=Inter:wght@600;700&display=swap');
+
+    * {
+      font-family: 'Inter', 'Tajawal', sans-serif;
+    }
+
+    /* Decorative gradient bar with symbols */
+    .zellij {
+      height: 22px;
+      background: linear-gradient(90deg, #d4af37, #f9e076, #d4af37);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .zellij:before {
+      content: "◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈";
+      color: #1a1200;
+      font-size: 10px;
+      letter-spacing: 3px;
+      white-space: nowrap;
+    }
+
+    /* Bus marker pin style */
+    .bus-pin {
+      width: 34px;
+      height: 44px;
+      background: var(--c);
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      border: 2px solid white;
+    }
+
+    .bus-pin i {
+      transform: rotate(45deg);
+      color: white;
+      font-size: 14px;
+    }
+
+    /* Label on bus pin */
+    .bus-label {
+      position: absolute;
+      left: 28px;
+      top: -6px;
+      background: var(--c);
+      color: white;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+      transform: rotate(45deg);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Language flag buttons */
+    .flag {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: 2px solid #d4af37;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .flag.active {
+      box-shadow: 0 0 0 4px #d4af37, 0 4px 16px rgba(212, 175, 55, 0.5);
+      transform: scale(1.08);
+    }
+
+    /* Route card style */
+    .route-card {
+      background: #1e1e22;
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      gap: 12px;
+      border-left: 4px solid var(--c);
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
-<body class="bg-[#0e0e12] text-white h-[100vh] flex flex-col overflow-hidden">
-<div class="zellij"></div>
-<div class="bg-[#121218] px-4 py-2 flex justify-between items-center"><div class="flex gap-2 items-center"><div class="w-9 h-9 bg-[#1e1e22] rounded-xl flex items-center justify-center text-[#d4af37]"><i class="fa-solid fa-bus"></i></div><div><b>Transpo <span class="text-[#d4af37]">PRO</span></b><div class="text-[11px] text-[#d4af37] -mt-1">Tanger</div></div></div><div class="flex gap-3"><button class="text-[#d4af37]"><i class="fa-solid fa-bell"></i></button><button onclick="switchTab('compte')" class="w-7 h-7 rounded-full bg-[#2a2a30] text-[10px] border border-[#d4af37]">ME</button></div></div>
-<div class="zellij" style="height:10px"></div>
-<div class="bg-[#18181d] px-2 py-3 flex justify-between"><button class="flag active">🇲🇦</button><button class="flag">🇫🇷</button><button class="flag">🇬🇧</button><button class="flag">🇪🇸</button><button class="flag">+</button></div>
-<div class="flex-1 relative">
-<div id="map" class="absolute inset-0"></div>
-<div id="centerLabel" class="absolute left-1/2 top-[40%] -translate-x-1/2 z-[400] bg-[#1e1e22]/90 px-3 py-1 rounded-full text-[11px] font-bold border border-white/20">📍 Tanger - Ibn Battouta School</div>
-<div class="absolute right-3 top-16 z-[400] flex flex-col gap-2"><button onclick="map.zoomIn()" class="w-10 h-10 rounded-xl bg-[#1e1e22] border-2 border-[#d4af37] font-bold">+</button><button onclick="map.zoomOut()" class="w-10 h-10 rounded-xl bg-[#1e1e22] border-2 border-[#d4af37] font-bold">−</button></div>
-</div>
-<div class="bg-[#15151a] rounded-t-[20px] -mt-5 z-10 flex flex-col max-h-[48vh]">
-<div class="flex justify-center py-2"><div class="w-10 h-1 bg-[#3f3f46] rounded-full"></div></div>
-<div class="overflow-auto px-3 flex-1">
-<div id="tab-carte" class="tab active"><div id="tripList"></div><div class="text-[#d4af37] text-xs font-bold py-2">● Live Trips • 4 en route</div></div>
-<div id="tab-trajets" class="tab"><h3 class="font-bold mb-2">Tous les Trajets</h3><div class="space-y-2"><div class="bg-[#1e1e22] p-3 rounded-xl">B-142 • Tanger Centre → Malabata<br><span class="text-xs text-[#a1a1aa]">Toutes les 8 min • 22 min • 6 arrêts</span></div><div class="bg-[#1e1e22] p-3 rounded-xl">B-207 • Gare → Plage<br><span class="text-xs text-[#a1a1aa]">Toutes les 12 min • 35 min • 10 arrêts</span></div><div class="bg-[#1e1e22] p-3 rounded-xl">B-055 • Zone Indus → Cap Spartel<br><span class="text-xs text-[#a1a1aa]">Toutes les 15 min • 40 min • 12 arrêts</span></div></div></div>
-<div id="tab-alertes" class="tab"><h3 class="font-bold mb-3">Alertes <span class="bg-[#f97316] text-white text-[10px] px-2 rounded-full">2</span></h3><div class="bg-[#2a1e0f] border border-[#f97316]/30 p-3 rounded-xl mb-2"><b class="text-[#f97316]">⚠️ Retard 5 min</b><br><span class="text-xs">B-207 en retard à cause du trafic - Malabata</span></div><div class="bg-[#0f2a1e] border border-[#22c55e]/30 p-3 rounded-xl"><b class="text-[#22c55e]">✅ Arrivée</b><br><span class="text-xs">B-142 arrivé à l'école Ibn Battouta</span></div></div>
-<div id="tab-compte" class="tab"><h3 class="font-bold mb-3">Compte</h3><div class="bg-black text-white p-4 rounded-xl mb-3"><div class="text-sm">⏳ Période d'essai</div><div class="text-[#facc15] font-bold">Reste 13 jours</div></div><button class="w-full bg-[#d4af37] text-black p-3 rounded-xl font-bold mb-2">Mode Chauffeur 🚍</button><button onclick="alert('Abonnement 10 MAD/mois')" class="w-full bg-white text-black p-3 rounded-xl font-bold mb-2">Passager - 10 MAD/mois</button><button onclick="alert('Abonnement 13 MAD/mois')" class="w-full bg-[#27272a] text-white p-3 rounded-xl font-bold">Chauffeur - 13 MAD/mois</button><div class="mt-4 bg-[#1e1e22] p-3 rounded-xl"><b>لوحة السائق التجريبية:</b><br><span class="text-xs">• بدء الرحلة GPS<br>• لائحة 12 تلميذ<br>• تنبيه الآباء</span><br><button onclick="alert('تم بدء الرحلة! GPS مفعل')" class="mt-2 w-full bg-[#22c55e] p-2 rounded-xl font-bold">▶️ بدء الرحلة</button></div></div>
-</div>
-<div class="bg-[#0e0e12] border-t border-[#27272a] grid grid-cols-4 py-2">
-<button onclick="switchTab('carte')" id="nav-carte" class="navbtn active flex flex-col items-center gap-1 text-[11px]"><i class="fa-solid fa-location-dot text-lg"></i>Carte<span class="dot w-1 h-1 bg-[#d4af37] rounded-full hidden"></span></button>
-<button onclick="switchTab('trajets')" id="nav-trajets" class="navbtn flex flex-col items-center gap-1 text-[11px] text-[#71717a]"><i class="fa-solid fa-list text-lg"></i>Trajets<span class="dot w-1 h-1 bg-[#d4af37] rounded-full hidden"></span></button>
-<button onclick="switchTab('alertes')" id="nav-alertes" class="navbtn flex flex-col items-center gap-1 text-[11px] text-[#71717a] relative"><i class="fa-solid fa-bell text-lg"></i><span class="absolute -top-1 right-4 bg-[#f97316] text-white text-[8px] w-3 h-3 rounded-full flex items-center justify-center">2</span>Alertes<span class="dot w-1 h-1 bg-[#d4af37] rounded-full hidden"></span></button>
-<button onclick="switchTab('compte')" id="nav-compte" class="navbtn flex flex-col items-center gap-1 text-[11px] text-[#71717a]"><i class="fa-solid fa-user text-lg"></i>Compte<span class="dot w-1 h-1 bg-[#d4af37] rounded-full hidden"></span></button>
-</div>
-</div>
-<div class="zellij"></div>
-<script>
-let map;function init(){map=L.map('map',{zoomControl:false}).setView([35.7595,-5.834],13.5);L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);const trips=[{id:'B-142',lat:35.768,lng:-5.82,c:'#22c55e'},{id:'B-207',lat:35.765,lng:-5.805,c:'#f97316'},{id:'B-055',lat:35.755,lng:-5.795,c:'#ef4444'},{id:'B-319',lat:35.75,lng:-5.835,c:'#3b82f6'}];trips.forEach(t=>{const h=`<div style="--c:${t.c}" class="bus-pin"><i class="fa-solid fa-bus text-xs"></i><span class="bus-label">${t.id}</span></div>`;L.marker([t.lat,t.lng],{icon:L.divIcon({className:'',html:h,iconSize:[34,44],iconAnchor:[17,44]})}).addTo(map);});renderTrips();}
-function renderTrips(){document.getElementById('tripList').innerHTML=`<div class="route-card" style="--c:#22c55e"><div class="w-9 h-9 rounded-full bg-[#22c55e] flex items-center justify-center"><i class="fa-solid fa-bus text-white text-sm"></i></div><div class="flex-1"><div class="flex justify-between"><b class="text-[12px]">Route A - École...</b><span class="text-[10px] bg-[#22c55e]/20 text-[#22c55e] px-2 rounded-full">ETA 6 min</span></div><div class="text-[11px] text-[#d4af37]">Plate: 9-1346 ب <span class="text-[#a1a1aa] ml-2">👤 1.2 km</span></div></div></div><div class="route-card" style="--c:#f97316"><div class="w-9 h-9 rounded-full bg-[#f97316] flex items-center justify-center"><i class="fa-solid fa-bus text-white text-sm"></i></div><div class="flex-1"><div class="flex justify-between"><b class="text-[12px]">Route B - Malab...</b><span class="text-[10px] bg-[#f97316]/20 text-[#f97316] px-2 rounded-full">ETA 12 min</span></div><div class="text-[11px] text-[#d4af37]">Plate: 7-7821 د <span class="text-[#a1a1aa] ml-2">👤 2.8 km</span></div></div></div>`;}
-function switchTab(name){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');document.querySelectorAll('.navbtn').forEach(b=>{b.classList.remove('active');b.classList.add('text-[#71717a]');b.querySelector('.dot').style.display='none';});const active=document.getElementById('nav-'+name);active.classList.add('active');active.classList.remove('text-[#71717a]');active.querySelector('.dot').style.display='block';if(name==='carte'){setTimeout(()=>map.invalidateSize(),100);}if(navigator.vibrate) navigator.vibrate(50);}
-init();
-const params=new URLSearchParams(location.search);if(params.get('driver')==='1'){switchTab('compte');}
-</script>
+
+<body class="bg-[#0e0e12] text-white overflow-hidden h-[100vh] flex flex-col">
+  <!-- Decorative top bar -->
+  <div class="zellij"></div>
+
+  <!-- Header with logo and controls -->
+  <div class="bg-[#121218] px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div
+        class="w-10 h-10 bg-[#1e1e22] rounded-xl flex items-center justify-center text-[#d4af37]"
+      >
+        <i class="fa-solid fa-bus text-xl"></i>
+      </div>
+      <div>
+        <div class="font-black text-[17px]">
+          Transpo <span class="text-[#d4af37]">PRO</span>
+        </div>
+        <div class="text-[13px] text-[#d4af37] font-bold">Tanger</div>
+      </div>
+    </div>
+    <div class="flex gap-4 items-center text-[#a1a1aa]">
+      <button class="w-8 h-8 flex items-center justify-center" aria-label="Notifications">
+        <i class="fa-solid fa-bell text-[#d4af37]"></i>
+      </button>
+      <button class="w-8 h-8 flex items-center justify-center" aria-label="Search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <button
+        class="w-8 h-8 rounded-full bg-[#2a2a30] flex items-center justify-center text-xs font-bold border border-[#d4af37]"
+        aria-label="User Profile"
+      >
+        ME
+      </button>
+    </div>
+  </div>
+
+  <!-- Decorative smaller bar -->
+  <div class="zellij" style="height: 14px"></div>
+
+  <!-- Language selection flags -->
+  <div
+    class="bg-[#18181d] px-2 py-4 flex justify-between gap-2"
+    role="group"
+    aria-label="Language selection"
+  >
+    <button onclick="setLang('ar')" class="flag active" id="f-ar" aria-pressed="false" aria-label="Arabic">🇲🇦</button>
+    <button onclick="setLang('fr')" class="flag" id="f-fr" aria-pressed="false" aria-label="Français">🇫🇷</button>
+    <button onclick="setLang('en')" class="flag" id="f-en" aria-pressed="true" aria-label="English">🇬🇧</button>
+    <button onclick="setLang('es')" class="flag" id="f-es" aria-pressed="false" aria-label="Español">🇪🇸</button>
+    <button onclick="setLang('ber')" class="flag" id="f-ber" aria-pressed="false" aria-label="Berber">ⵜ</button>
+  </div>
+
+  <!-- Language names below flags -->
+  <div
+    class="bg-[#18181d] px-3 pb-2 flex justify-between text-[10px] text-[#a1a1aa] text-center"
+  >
+    <span class="w-[58px]">العربية</span>
+    <span class="w-[58px]">Français</span>
+    <span class="w-[58px] text-[#d4af37] font-bold">English</span>
+    <span class="w-[58px]">Español</span>
+    <span class="w-[58px]">ⵜⴰⵎⴰⵣⵉⵖⵜ</span>
+  </div>
+
+  <!-- Map container -->
+  <div class="flex-1 relative">
+    <div id="map" class="absolute inset-0 z-0"></div>
+
+    <!-- Zoom controls -->
+    <div
+      class="absolute right-3 top-20 z-[400] flex flex-col gap-2"
+      role="group"
+      aria-label="Zoom controls"
+    >
+      <button
+        onclick="map.zoomIn()"
+        class="w-11 h-11 rounded-2xl bg-[#1e1e22] border-2 border-[#d4af37] text-white flex items-center justify-center text-xl font-bold"
+        aria-label="Zoom in"
+      >
+        +
+      </button>
+      <button
+        onclick="map.zoomOut()"
+        class="w-11 h-11 rounded-2xl bg-[#1e1e22] border-2 border-[#d4af37] text-white flex items-center justify-center text-xl font-bold"
+        aria-label="Zoom out"
+      >
+        &minus;
+      </button>
+    </div>
+
+    <!-- Locate me button -->
+    <button
+      onclick="locateMe()"
+      class="absolute right-3 bottom-[200px] z-[400] w-12 h-12 rounded-full bg-[#1e1e22] border-2 border-[#d4af37] text-[#d4af37] flex items-center justify-center"
+      aria-label="Locate me"
+    >
+      <i class="fa-solid fa-location-dot text-xl"></i>
+    </button>
+
+    <!-- Center label -->
+    <div
+      id="centerLabel"
+      class="absolute left-1/2 top-[46%] -translate-x-1/2 z-[400] bg-[#1e1e22]/90 px-3 py-1.5 rounded-full text-[11px] font-bold border border-white/20 whitespace-nowrap"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      📍 Tanger - Ibn Battouta School
+    </div>
+  </div>
+
+  <!-- Bottom panel with trip list and navigation -->
+  <div
+    class="bg-[#15151a] rounded-t-[24px] -mt-6 z-10 relative border-t border-[#2a2a30] max-h-[46vh] flex flex-col"
+  >
+    <div class="flex justify-center pt-3 pb-2">
+      <div class="w-12 h-1.5 bg-[#3f3f46] rounded-full"></div>
+    </div>
+
+    <div id="tripList" class="overflow-auto px-3 pb-2 flex-1"></div>
+
+    <div
+      class="px-4 py-2 flex items-center justify-between text-[13px] font-black text-[#d4af37]"
+      aria-live="polite"
+    >
+      <span>● Live Trips • 4 en route</span>
+    </div>
+
+    <div
+      class="bg-[#0e0e12] border-t border-[#27272a] grid grid-cols-4 py-2 px-2"
+      role="navigation"
+      aria-label="Main navigation"
+    >
+      <button
+        class="flex flex-col items-center gap-1 text-[#d4af37]"
+        aria-current="page"
+        aria-label="Carte"
+      >
+        <i class="fa-solid fa-location-dot text-[18px]"></i>
+        <span class="text-[11px] font-bold">Carte</span>
+        <span class="w-1.5 h-1.5 bg-[#d4af37] rounded-full"></span>
+      </button>
+      <button class="flex flex-col items-center gap-1 text-[#71717a]" aria-label="Trajets">
+        <i class="fa-solid fa-list text-[18px]"></i>
+        <span class="text-[11px]">Trajets</span>
+      </button>
+      <button
+        class="flex flex-col items-center gap-1 text-[#71717a] relative"
+        aria-label="Alertes"
+      >
+        <i class="fa-solid fa-bell text-[18px]"></i>
+        <span
+          class="absolute -top-1 right-5 bg-[#f97316] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold"
+          >2</span
+        >
+        <span class="text-[11px]">Alertes</span>
+      </button>
+      <button class="flex flex-col items-center gap-1 text-[#71717a]" aria-label="Compte">
+        <i class="fa-solid fa-user text-[18px]"></i>
+        <span class="text-[11px]">Compte</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Decorative bottom bar -->
+  <div class="zellij"></div>
+
+  <script>
+    // Current language
+    let lang = 'en';
+
+    // Translations and routes by language
+    const t = {
+      ar: {
+        a: 'طنجة - ابن بطوطة',
+        routes: [
+          'مسار A - مدرسة → وسط المدينة',
+          'مسار B - ملابطا → ثانوية',
+          'مسار C - حي السلام → ابن بطوطة',
+        ],
+      },
+      fr: {
+        a: 'Tanger - Ibn Battouta',
+        routes: [
+          'Route A - École → Centre-ville',
+          'Route B - Malabata → Lycée',
+          'Route C - Hay Salam → Ibn Battouta',
+        ],
+      },
+      en: {
+        a: 'Tanger - Ibn Battouta',
+        routes: [
+          'Route A - École → Centre-ville',
+          'Route B - Malabata → Lycée',
+          'Route C - Hay Salam → Ibn Battouta',
+        ],
+      },
+      es: {
+        a: 'Tanger - Ibn Battouta',
+        routes: [
+          'Ruta A - Escuela → Centro',
+          'Ruta B - Malabata → Liceo',
+          'Ruta C - Hay Salam → Ibn Battouta',
+        ],
+      },
+      ber: {
+        a: 'Tanger - Ibn Battouta',
+        routes: [
+          'Abrid A - Asinan → Tamdint',
+          'Abrid B - Malabata → Asinan',
+          'Abrid C - Hay Salam → Ibn Battouta',
+        ],
+      },
+    };
+
+    // Set language and update UI accordingly
+    function setLang(l) {
+      lang = l;
+      document.querySelectorAll('.flag').forEach((f) => {
+        f.classList.remove('active');
+        f.setAttribute('aria-pressed', 'false');
+      });
+      const activeFlag = document.getElementById('f-' + l);
+      if (activeFlag) {
+        activeFlag.classList.add('active');
+        activeFlag.setAttribute('aria-pressed', 'true');
+      }
+      document.getElementById('centerLabel').textContent = '📍 ' + t[l].a;
+      renderTrips();
+    }
+
+    // Sample trips data
+    const trips = [
+      {
+        id: 'B-142',
+        lat: 35.768,
+        lng: -5.82,
+        c: '#3b82f6',
+        km: '1.2 km',
+        plate: '9-ب 1346',
+        status: 'green',
+      },
+      {
+        id: 'B-207',
+        lat: 35.765,
+        lng: -5.805,
+        c: '#f97316',
+        km: '2.8 km',
+        plate: '7-د 7821',
+        status: 'orange',
+      },
+      {
+        id: 'B-055',
+        lat: 35.755,
+        lng: -5.795,
+        c: '#ef4444',
+        km: '4.5 km',
+        plate: '1-ج 9094',
+        status: 'red',
+      },
+      {
+        id: 'B-319',
+        lat: 35.75,
+        lng: -5.835,
+        c: '#3b82f6',
+        km: '0.9 km',
+        plate: '2-ب 4456',
+        status: 'blue',
+      },
+    ];
+
+    let map;
+
+    // Initialize the map and markers
+    function init() {
+      map = L.map('map', { zoomControl: false }).setView([35.7595, -5.834], 13.5);
+
+      L.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+        {
+          maxZoom: 19,
+          attribution:
+            '&copy; <a href="https://carto.com/">CARTO</a> contributors',
+        }
+      ).addTo(map);
+
+      trips.forEach((tr) => {
+        const html = `
+          <div style="--c:${tr.c}" class="bus-pin">
+            <i class="fa-solid fa-bus"></i>
+            <span class="bus-label">${tr.id}</span>
+          </div>
+        `;
+        const icon = L.divIcon({
+          className: '',
+          html: html,
+          iconSize: [34, 44],
+          iconAnchor: [17, 44],
+        });
+        L.marker([tr.lat, tr.lng], { icon }).addTo(map);
+      });
+
+      renderTrips();
+    }
+
+    // Render trip cards in the list
+    function renderTrips() {
+      const container = document.getElementById('tripList');
+      container.innerHTML = trips
+        .slice(0, 3)
+        .map((tr, i) => {
+          const name = t[lang]?.routes[i] || tr.id;
+          const col =
+            tr.status === 'green'
+              ? '#22c55e'
+              : tr.status === 'orange'
+              ? '#f97316'
+              : '#ef4444';
+          const eta =
+            tr.id === 'B-142'
+              ? '6 min'
+              : tr.id === 'B-207'
+              ? '12 min'
+              : '18 min';
+          return `
+            <div class="route-card" style="--c:${col}">
+              <div
+                class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                style="background:${col}"
+              >
+                <i class="fa-solid fa-bus text-white"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between gap-2">
+                  <div class="font-bold text-[13px] truncate">${name}</div>
+                  <span
+                    class="text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap border"
+                    style="color:${col};background:${col}22;border-color:${col}55"
+                    >ETA ${eta} ⏱</span
+                  >
+                </div>
+                <div class="flex gap-3 mt-1">
+                  <span class="text-[11px] text-[#d4af37]">Plate: ${tr.plate}</span>
+                  <span
+                    class="text-[11px] text-[#a1a1aa] bg-[#27272a] px-2 rounded-full"
+                    >👤 ${tr.km}</span
+                  >
+                </div>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    // Center map on predefined location
+    function locateMe() {
+      map.setView([35.7595, -5.834], 14);
+    }
+
+    // Initialize map on page load
+    window.onload = init;
+  </script>
 </body>
 </html>
+ 
