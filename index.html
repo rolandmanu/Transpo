@@ -1,113 +1,164 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تطبيق العرس - Wedding App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Transpo PRO Tanger - Full Complete</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma}
-  body{background:linear-gradient(135deg,#fff0f5,#ffe4e1);min-height:100vh}
-  #languageScreen{position:fixed;inset:0;background:linear-gradient(135deg,#ff9a9e,#fecfef);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000}
-  .lang-card{background:white;padding:20px 30px;border-radius:20px;margin:10px;cursor:pointer;box-shadow:0 5px 15px rgba(0,0,0,.1);transition:.3s;border:3px solid transparent;text-align:center}
-  .lang-card:hover,.lang-card.active{border-color:#ff4081;transform:scale(1.05)}
-  .lang-card span{font-size:40px}
-  .btn{background:#ff4081;color:white;border:none;padding:15px 50px;border-radius:30px;font-size:18px;cursor:pointer;margin-top:30px;box-shadow:0 5px 15px rgba(255,64,129,.4)}
-  #appScreen{display:none;padding:20px}
-  .header{background:white;padding:20px;border-radius:20px;text-align:center;box-shadow:0 5px 15px rgba(0,0,0,.05);margin-bottom:20px}
-  .upload-box{border:3px dashed #ff4081;border-radius:20px;padding:40px;text-align:center;background:white;cursor:pointer}
-  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px;margin-top:20px}
-  .gallery img{width:100%;border-radius:15px;box-shadow:0 5px 10px rgba(0,0,0,.1)}
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@700;900&family=Inter:wght@600;700&display=swap');
+*{font-family:'Inter','Tajawal',sans-serif}
+.zellij{height:22px;background:linear-gradient(90deg,#d4af37,#f9e076,#d4af37);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.zellij:before{content:"◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈";color:#1a1200;font-size:10px;letter-spacing:3px;white-space:nowrap}
+.bus-pin{width:34px;height:44px;background:var(--c);border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.5);border:2px solid white}
+.bus-pin i{transform:rotate(45deg);color:white;font-size:14px}
+.bus-label{position:absolute;left:28px;top:-6px;background:var(--c);color:white;font-size:11px;font-weight:900;padding:3px 8px;border-radius:999px;white-space:nowrap;transform:rotate(45deg);box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.flag{width:58px;height:58px;border-radius:50%;border:2px solid #d4af37;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 0 3px rgba(212,175,55,.2);transition:.25s;background:#1e1e22;cursor:pointer}
+.flag.active{box-shadow:0 0 0 4px #d4af37, 0 4px 16px rgba(212,175,55,.5);transform:scale(1.08);background:#2a2a30}
+.route-card{background:#1e1e22;border-radius:16px;padding:14px;display:flex;gap:12px;border-left:4px solid var(--c);margin-bottom:10px}
+.code-frame{background:#0a0a0e;border:1px solid #d4af37;border-radius:14px;overflow:hidden;box-shadow:0 0 0 2px rgba(212,175,55,.15), 0 10px 30px rgba(0,0,0,.5)}
+.code-header{background:#1a1a22;padding:8px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #27272a}
+.dot{width:10px;height:10px;border-radius:50%}
+#firstLangScreen{position:fixed;inset:0;z-index:9999;background:#0e0e12;display:flex;flex-direction:column}
 </style>
 </head>
-<body>
+<body class="bg-[#0e0e12] text-white overflow-hidden h-[100vh] flex flex-col">
 
-<!-- 1 - واجهة اللغة فقط - كتبان أول مرة -->
-<div id="languageScreen">
-  <h1 style="color:white;font-size:50px;margin-bottom:10px">💖</h1>
-  <h2 style="color:white;margin-bottom:30px">اختر لغتك / Choisissez / Choose Language</h2>
-  <div style="display:flex;flex-wrap:wrap;justify-content:center">
-    <div class="lang-card active" data-lang="ar" onclick="selectLang('ar')"><span>🇲🇦</span><br><b>العربية</b></div>
-    <div class="lang-card" data-lang="fr" onclick="selectLang('fr')"><span>🇫🇷</span><br><b>Français</b></div>
-    <div class="lang-card" data-lang="en" onclick="selectLang('en')"><span>🇬🇧</span><br><b>English</b></div>
+<!-- 1 - واجهة اللغات الأولى فقط -->
+<div id="firstLangScreen">
+  <div class="zellij"></div>
+  <div class="flex-1 overflow-auto flex flex-col items-center p-5">
+    <div class="w-20 h-20 bg-[#1e1e22] rounded-[20px] flex items-center justify-center text-[#d4af37] border-2 border-[#d4af37] mt-4 shadow-[0_0_20px_rgba(212,175,55,.3)]"><i class="fa-solid fa-bus text-3xl"></i></div>
+    <h1 class="text-[28px] font-black mt-3">Transpo <span class="text-[#d4af37]">PRO</span> Tanger</h1>
+    <p id="welcomeText" class="text-[#d4af37] font-bold text-[15px] mt-2 text-center max-w-[320px] leading-6">مرحباً بك! النقل المدرسي الذكي والآمن في طنجة - Ibn Battouta School</p>
+    <div class="code-frame w-full max-w-[360px] mt-6 text-left">
+      <div class="code-header"><div class="flex gap-1.5"><div class="dot bg-red-500"></div><div class="dot bg-yellow-400"></div><div class="dot bg-green-500"></div></div><span class="text-[11px] text-[#71717a] ml-2">transpo.config.js</span><span class="ml-auto text-[10px] bg-[#d4af37] text-black px-2 py-0.5 rounded-full font-bold">FULL v3.0</span></div>
+      <div class="p-3 text-[11px] leading-[20px] font-mono"><span class="text-[#71717a]">// wajha lowla = logha fa9at + tarhib</span><br><span class="text-[#a78bfa]">const</span> <span class="text-[#f9e076]">app</span> = {<br>&nbsp;&nbsp;city: <span class="text-[#86efac]">"Tanger"</span>,<br>&nbsp;&nbsp;school: <span class="text-[#86efac]">"Ibn Battouta"</span>,<br>&nbsp;&nbsp;lang: <span class="text-[#f97316]" id="codeLang">"ar"</span>,<br>&nbsp;&nbsp;features: [<span class="text-[#86efac]">"driver","passenger","qr","admin"</span>]<br>};<br><span class="text-[#71717a]">// 5 langues supportées</span></div>
+    </div>
+    <div class="mt-6 w-full max-w-[360px]">
+      <p id="chooseLangText" class="text-[13px] text-[#a1a1aa] font-bold mb-3 text-center">اختر لغتك / Choisissez votre langue / Choose language</p>
+      <div class="bg-[#18181d] rounded-2xl p-4 flex justify-between gap-2">
+        <button onclick="selectFirstLang('ar')" class="flag active" id="ff-ar">🇲🇦</button>
+        <button onclick="selectFirstLang('fr')" class="flag" id="ff-fr">🇫🇷</button>
+        <button onclick="selectFirstLang('en')" class="flag" id="ff-en">🇬🇧</button>
+        <button onclick="selectFirstLang('es')" class="flag" id="ff-es">🇪🇸</button>
+        <button onclick="selectFirstLang('ber')" class="flag" id="ff-ber">ⵜ</button>
+      </div>
+      <div class="bg-[#18181d] px-3 pb-2 pt-1 flex justify-between text-[10px] text-[#a1a1aa] text-center rounded-b-2xl -mt-2">
+        <span class="w-[58px]">العربية</span><span class="w-[58px]">Français</span><span class="w-[58px] text-[#d4af37] font-bold" id="lbl-en">English</span><span class="w-[58px]">Español</span><span class="w-[58px]">ⵜⴰⵎⴰⵣⵉⵖⵜ</span>
+      </div>
+    </div>
+    <button id="enterBtn" onclick="enterApp()" class="mt-6 w-full max-w-[360px] bg-[#d4af37] text-black font-black py-4 rounded-full text-[16px] shadow-[0_8px_25px_rgba(212,175,55,.4)]">دخول - Entrer - Enter →</button>
+    <p class="text-[10px] text-[#52525b] mt-3 text-center">سيتم حفظ لغتك - هذه الواجهة لن تظهر مرة أخرى</p>
   </div>
-  <button class="btn" onclick="enterApp()">دخول - Entrer - Enter</button>
+  <div class="zellij"></div>
 </div>
 
-<!-- 2 - باقي التطبيق -->
-<div id="appScreen">
-  <div class="header">
-    <h1 id="appTitle">تطبيق العرس 👰🤵</h1>
-    <p id="appSub">ارفع صورة أو فيديو باش نصاوبو ليك صورة عرس</p>
+<!-- 2 - التطبيق الرئيسي -->
+<div id="mainApp" class="hidden flex-1 flex flex-col h-[100vh]">
+  <div class="zellij"></div>
+  <div class="bg-[#121218] px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3"><div class="w-10 h-10 bg-[#1e1e22] rounded-xl flex items-center justify-center text-[#d4af37]"><i class="fa-solid fa-bus text-xl"></i></div><div><div class="font-black text-[17px]">Transpo <span class="text-[#d4af37]">PRO</span></div><div class="text-[13px] text-[#d4af37] font-bold">Tanger</div></div></div>
+    <div class="flex gap-2 items-center text-[#a1a1aa]">
+      <button onclick="openQR()" class="w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center"><i class="fa-solid fa-qrcode"></i></button>
+      <button onclick="openPassengerPanel()" class="w-9 h-9 rounded-xl bg-[#38bdf8]/20 border border-[#38bdf8] text-[#38bdf8] flex items-center justify-center"><i class="fa-solid fa-child"></i></button>
+      <button onclick="openDriverPanel()" class="w-9 h-9 rounded-xl bg-[#d4af37]/20 border border-[#d4af37] text-[#d4af37] flex items-center justify-center"><i class="fa-solid fa-id-badge"></i></button>
+      <button onclick="openAdminPanel()" class="w-9 h-9 rounded-xl bg-[#ef4444]/20 border border-[#ef4444] text-[#ef4444] flex items-center justify-center"><i class="fa-solid fa-gear"></i></button>
+      <button onclick="resetLang()" class="w-8 h-8 rounded-full bg-[#2a2a30] flex items-center justify-center text-xs font-bold border border-[#d4af37]">ME</button>
+    </div>
   </div>
-
-  <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-    <p style="font-size:40px">📸</p>
-    <p id="uploadText">اضغط لرفع صورة العرسان</p>
-    <input type="file" id="fileInput" hidden accept="image/*,video/*" onchange="handleFile(this)">
+  <div class="zellij" style="height:14px"></div>
+  <div class="flex-1 relative">
+    <div id="map" class="absolute inset-0 z-0"></div>
+    <div class="absolute right-3 top-20 z-[400] flex flex-col gap-2"><button onclick="map.zoomIn()" class="w-11 h-11 rounded-2xl bg-[#1e1e22] border-2 border-[#d4af37] text-white flex items-center justify-center text-xl font-bold">+</button><button onclick="map.zoomOut()" class="w-11 h-11 rounded-2xl bg-[#1e1e22] border-2 border-[#d4af37] text-white flex items-center justify-center text-xl font-bold">−</button></div>
+    <button onclick="locateMe()" class="absolute right-3 bottom-[200px] z-[400] w-12 h-12 rounded-full bg-[#1e1e22] border-2 border-[#d4af37] text-[#d4af37] flex items-center justify-center"><i class="fa-solid fa-location-dot text-xl"></i></button>
+    <div id="centerLabel" class="absolute left-1/2 top-[46%] -translate-x-1/2 z-[400] bg-[#1e1e22]/90 px-3 py-1.5 rounded-full text-[11px] font-bold border border-white/20 whitespace-nowrap">📍 Tanger - Ibn Battouta School</div>
   </div>
-
-  <div style="margin-top:20px;display:flex;gap:10px">
-    <button class="btn" style="flex:1" onclick="createWedding('moroccan')" id="btnMoroccan">عرس مغربي</button>
-    <button class="btn" style="flex:1;background:#6c63ff" onclick="createWedding('white')" id="btnWhite">عرس عصري</button>
+  <div class="bg-[#15151a] rounded-t-[24px] -mt-6 z-10 relative border-t border-[#2a2a30] max-h-[46vh] flex flex-col">
+    <div class="flex justify-center pt-3 pb-2"><div class="w-12 h-1.5 bg-[#3f3f46] rounded-full"></div></div>
+    <div id="tripList" class="overflow-auto px-3 pb-2 flex-1"></div>
+    <div class="px-4 py-2 flex items-center justify-between text-[13px] font-black text-[#d4af37]"><span id="liveText">● Live Trips • 4 en route</span><div class="flex gap-2"><button onclick="openPassengerPanel()" class="text-[10px] bg-[#38bdf8] text-black px-3 py-1 rounded-full font-black">PASSENGER</button><button onclick="openDriverPanel()" class="text-[10px] bg-[#d4af37] text-black px-3 py-1 rounded-full font-black">DRIVER</button></div></div>
+    <div class="bg-[#0e0e12] border-t border-[#27272a] grid grid-cols-5 py-2 px-2">
+      <button class="flex flex-col items-center gap-1 text-[#d4af37]"><i class="fa-solid fa-location-dot text-[18px]"></i><span id="navMap" class="text-[11px] font-bold">Carte</span><span class="w-1.5 h-1.5 bg-[#d4af37] rounded-full"></span></button>
+      <button onclick="openQR()" class="flex flex-col items-center gap-1 text-[#71717a]"><i class="fa-solid fa-qrcode text-[18px]"></i><span class="text-[11px]">QR Scan</span></button>
+      <button onclick="openPassengerPanel()" class="flex flex-col items-center gap-1 text-[#71717a]"><i class="fa-solid fa-child text-[18px]"></i><span id="navTrips" class="text-[11px]">Mon Pass</span></button>
+      <button class="flex flex-col items-center gap-1 text-[#71717a] relative"><i class="fa-solid fa-bell text-[18px]"></i><span class="absolute -top-1 right-5 bg-[#f97316] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">2</span><span id="navAlerts" class="text-[11px]">Alertes</span></button>
+      <button onclick="openAdminPanel()" class="flex flex-col items-center gap-1 text-[#ef4444]"><i class="fa-solid fa-gear text-[18px]"></i><span class="text-[11px]">Admin</span></button>
+    </div>
   </div>
-
-  <div class="gallery" id="gallery"></div>
+  <div class="zellij"></div>
 </div>
+
+<!-- 3 - لوحة الراكب الكاملة -->
+<div id="passengerPanel" class="fixed inset-0 z-[5000] bg-[#0e0e12] hidden flex-col">
+  <div class="zellij"></div>
+  <div class="bg-[#121218] px-4 py-3 flex items-center justify-between"><div class="flex items-center gap-3"><button onclick="closePassengerPanel()" class="w-9 h-9 bg-[#1e1e22] rounded-xl flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></button><div><div id="passTitle" class="font-black">لوحة الراكب - Passenger</div><div id="passSub" class="text-[12px] text-[#38bdf8]">Aya • CM2 • B-142 • 2.3km • Hay Salam</div></div></div><span class="bg-[#38bdf8] text-black text-[11px] font-black px-3 py-1 rounded-full">ACTIVE PASS</span></div>
+  <div class="flex-1 overflow-auto p-3 space-y-3">
+    <div class="bg-gradient-to-br from-[#38bdf8] to-[#1e40af] rounded-[20px] p-4 text-black"><div class="flex justify-between"><div><div class="font-black text-[16px]">Transpo PASS PRO</div><div class="text-[12px] opacity-80">Ibn Battouta • 2025-2026 • Valid</div></div><i class="fa-solid fa-id-card text-2xl opacity-70"></i></div><div class="flex gap-4 mt-4 items-center"><img src="https://i.pravatar.cc/100?img=5" class="w-14 h-14 rounded-full border-2 border-white shadow"><div><div class="font-black">Aya El Mansouri</div><div class="text-[12px]">2.3 km • B-142 • Seat 7 • Hay Salam</div><div class="text-[11px] mt-1 bg-black/20 inline-block px-2 py-0.5 rounded-full">QR: TRP-8841 • CM2-A</div></div></div><button onclick="openQR()" class="mt-4 w-full bg-black text-white py-2.5 rounded-full text-[12px] font-bold">📷 عرض QR الخاص بي - Show My QR Code</button></div>
+    <div class="code-frame"><div class="code-header"><span id="busNow" class="text-[13px] font-bold">🚌 الباص الآن - Bus Live</span><span id="etaNow" class="ml-auto text-[11px] bg-[#22c55e] text-black px-2 py-1 rounded-full font-black">يصل بعد 6 دقائق</span></div><div class="p-3"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-[#22c55e] flex items-center justify-center"><i class="fa-solid fa-bus text-white"></i></div><div class="flex-1"><div class="font-bold text-[13px]">B-142 • أحمد • 9-ب 1346 • 4.9⭐ • Hay Salam</div><div class="text-[11px] text-[#a1a1aa]"><span id="distanceText">على بعد 1.2 كم</span> • 18 تلميذ داخل • 6 باقي</div></div><button class="w-9 h-9 rounded-full bg-[#1e1e22] border border-[#27272a] flex items-center justify-center"><i class="fa-solid fa-phone text-[#22c55e] text-xs"></i></button></div><div class="mt-3 bg-[#27272a] h-2 rounded-full"><div class="bg-[#22c55e] h-2 rounded-full" style="width:78%"></div></div><div class="flex justify-between text-[10px] text-[#71717a] mt-1"><span>École</span><span>Malabata (now)</span><span>Centre</span></div></div></div>
+    <div class="grid grid-cols-3 gap-2"><button class="bg-[#1e1e22] border border-[#27272a] rounded-2xl p-3 text-center"><i class="fa-solid fa-qrcode text-[#38bdf8] text-xl"></i><div id="qrBtn" class="font-bold mt-1 text-[11px]">QR الخاص بي</div><div class="text-[9px] text-[#71717a]">Scan on boarding</div></button><button class="bg-[#1e1e22] border border-[#27272a] rounded-2xl p-3 text-center"><i class="fa-solid fa-bell text-[#f97316] text-xl"></i><div id="alertBtn" class="font-bold mt-1 text-[11px]">تنبيه الوصول</div><div class="text-[9px] text-[#71717a]">5 min before</div></button><button class="bg-[#1e1e22] border border-[#27272a] rounded-2xl p-3 text-center"><i class="fa-solid fa-location-dot text-[#22c55e] text-xl"></i><div id="shareBtn" class="font-bold mt-1 text-[11px]">مشاركة الموقع</div><div class="text-[9px] text-[#71717a]">To parents</div></button></div>
+    <div class="bg-[#1e1e22] rounded-2xl p-3"><div class="flex justify-between items-center mb-2"><div id="historyTitle" class="font-bold text-[13px]">سجل رحلاتي - Historique (7 jours)</div><span class="text-[10px] bg-[#27272a] px-2 py-1 rounded-full">3 trajets</span></div><div class="space-y-2 text-[12px]"><div class="flex justify-between bg-[#0e0e12] p-2.5 rounded-xl border border-[#27272a]"><span>📅 اليوم 07:15 → 07:32 • B-142 • Hay Salam</span><span class="text-[#22c55e] font-bold">✓ حضرت</span></div><div class="flex justify-between bg-[#0e0e12] p-2.5 rounded-xl border border-[#27272a]"><span>📅 أمس 07:12 → 07:30 • B-142</span><span class="text-[#22c55e] font-bold">✓ حضرت</span></div><div class="flex justify-between bg-[#0e0e12] p-2.5 rounded-xl border border-[#27272a]"><span>📅 11/10 07:18 → 07:35 • B-207</span><span class="text-[#f97316] font-bold">⏰ تأخرت 3د</span></div></div></div>
+    <div class="bg-[#15151a] border border-[#d4af37]/30 rounded-2xl p-3"><div id="parentTitle" class="font-bold text-[13px] text-[#d4af37]">👨‍👩‍👧 لوحة الآباء - Parent Control & Notifications</div><div class="grid grid-cols-2 gap-2 mt-2"><button id="notifyParent" class="bg-[#1e1e22] border border-[#27272a] rounded-xl p-2.5 text-[11px] font-bold">🔔 تنبيه عند الصعود<br><small class="text-[#71717a]">Boarding alert + WhatsApp</small></button><button id="callDriver" class="bg-[#1e1e22] border border-[#27272a] rounded-xl p-2.5 text-[11px] font-bold">📞 اتصال بالسائق<br><small class="text-[#71717a]">Call driver Ahmed</small></button></div></div>
+  </div>
+  <div class="p-3 border-t border-[#27272a]"><button onclick="closePassengerPanel()" id="closePassBtn" class="w-full bg-[#38bdf8] text-black font-black py-3.5 rounded-full">العودة للخريطة - Retour carte</button></div>
+  <div class="zellij"></div>
+</div>
+
+<!-- 4 - لوحة السائق الكاملة -->
+<div id="driverPanel" class="fixed inset-0 z-[5000] bg-[#0e0e12] hidden flex-col">
+  <div class="zellij"></div>
+  <div class="bg-[#121218] px-4 py-3 flex items-center justify-between"><div class="flex items-center gap-3"><button onclick="closeDriverPanel()" class="w-9 h-9 bg-[#1e1e22] rounded-xl flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></button><div><div id="driverTitle" class="font-black">لوحة السائق - Driver Dashboard</div><div id="driverSub" class="text-[12px] text-[#d4af37]">B-142 • أحمد • 4.9 ⭐ • 9-ب 1346 • 18 élèves</div></div></div><span class="bg-[#22c55e] text-black text-[11px] font-black px-3 py-1 rounded-full">ONLINE • 18/24</span></div>
+  <div class="flex-1 overflow-auto p-3 space-y-3">
+    <div class="code-frame"><div class="code-header"><span id="todayRoute" class="text-[13px] font-bold">مسار اليوم - Route A - Ibn Battouta</span><span class="ml-auto text-[10px] bg-[#d4af37] text-black px-2 py-1 rounded-full font-bold">6:30 AM • 6.2km</span></div><div class="p-3 space-y-2 text-[13px]"><div class="flex justify-between"><span class="text-[#a1a1aa]" id="dFrom">من:</span><span class="font-bold">École Ibn Battouta → Hay Salam</span></div><div class="flex justify-between"><span class="text-[#a1a1aa]" id="dTo">إلى:</span><span class="font-bold">Centre Ville Tanger</span></div><div class="flex justify-between"><span class="text-[#a1a1aa]" id="dStudents">تلاميذ:</span><span class="font-bold text-[#d4af37]">18 / 24 • 6 restants • Malabata</span></div><div class="w-full bg-[#27272a] h-2.5 rounded-full mt-2"><div class="bg-[#d4af37] h-2.5 rounded-full" style="width:75%"></div></div><div class="flex justify-between text-[10px] text-[#71717a]"><span>0 km départ</span><span>6.2 km total</span></div></div></div>
+    <div class="grid grid-cols-2 gap-3"><button onclick="openQR()" class="bg-[#1e1e22] border border-[#27272a] rounded-2xl p-4 text-left hover:border-[#22c55e]/50"><i class="fa-solid fa-qrcode text-[#22c55e] text-xl"></i><div id="startTrip" class="font-bold mt-2 text-[13px]">مسح QR - Scan Student</div><div id="startTripSub" class="text-[11px] text-[#71717a]">Scan QR pour présence</div></button><button class="bg-[#1e1e22] border border-[#27272a] rounded-2xl p-4 text-left"><i class="fa-solid fa-users text-[#d4af37] text-xl"></i><div id="studentsList" class="font-bold mt-2 text-[13px]">قائمة التلاميذ</div><div id="studentsSub" class="text-[11px] text-[#71717a]">18 présents • QR scan • Hay Salam</div></button><button class="bg-[#1e1e22] border border-[#27272a] rounded-2xl p-4 text-left"><i class="fa-solid fa-triangle-exclamation text-[#f97316] text-xl"></i><div id="reportProb" class="font-bold mt-2 text-[13px]">تبليغ مشكل</div><div id="reportSub" class="text-[11px] text-[#71717a]">Panne, retard, accident</div></button><button class="bg-[#1e1e22] border border-[#27272a] rounded-2xl p-4 text-left"><i class="fa-solid fa-gas-pump text-[#71717a] text-xl"></i><div id="fuelText" class="font-bold mt-2 text-[13px]">الوقود / Carburant</div><div class="text-[11px] text-[#71717a]">Diesel • 65% • 120 km restants</div></button></div>
+    <div class="bg-[#1e1e22] rounded-2xl p-3"><div id="studentsTitle" class="font-bold text-[13px] mb-2">تلاميذ اليوم - 18 / Liste élèves - Hay Salam</div><div id="driverStudents" class="space-y-2"></div></div>
+  </div>
+  <div class="p-3 border-t border-[#27272a]"><button onclick="closeDriverPanel()" id="closeDriverBtn" class="w-full bg-[#d4af37] text-black font-black py-3.5 rounded-full">العودة للخريطة - Retour carte</button></div>
+  <div class="zellij"></div>
+</div>
+
+<!-- 5 - QR Scanner -->
+<div id="qrPanel" class="fixed inset-0 z-[6000] bg-black hidden flex-col"><div class="zellij"></div><div class="p-4 flex justify-between items-center bg-[#121218]"><div class="font-black">📷 QR Scanner - مسح كود التلميذ</div><button onclick="closeQR()" class="w-9 h-9 bg-[#1e1e22] rounded-xl flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button></div><div id="reader" class="flex-1 bg-black"></div><div class="p-4 bg-[#121218] text-center"><div id="qrResult" class="text-[#22c55e] font-bold mb-2">وجه الكاميرا نحو QR الخاص بالتلميذ - Scan student QR</div><div class="text-[11px] text-[#71717a]">سيتم تسجيل حضور التلميذ تلقائياً + إشعار فوري للأب عبر واتساب</div></div><div class="zellij"></div></div>
+
+<!-- 6 - Admin -->
+<div id="adminPanel" class="fixed inset-0 z-[6000] bg-[#0e0e12] hidden flex-col"><div class="zellij"></div><div class="p-4 flex justify-between bg-[#121218]"><div class="font-black text-[#ef4444]">Admin Panel • لوحة الإدارة الكاملة</div><button onclick="closeAdminPanel()" class="w-9 h-9 bg-[#1e1e22] rounded-xl flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button></div><div class="flex-1 overflow-auto p-4 space-y-4"><div class="code-frame"><div class="code-header"><span class="text-[12px] font-bold">Firebase Config - ضع مفاتيحك هنا لتحويل GPS لواقعي</span></div><div class="p-3 text-[10px] font-mono text-[#71717a]">const firebaseConfig = { apiKey: "YOUR_KEY", authDomain: "transpo-pro.firebaseapp.com", databaseURL: "...", projectId: "transpo-pro" };<br>// احصل عليها من console.firebase.google.com → Project Settings</div></div><div class="grid grid-cols-2 gap-3"><div class="bg-[#1e1e22] p-3 rounded-xl border border-[#27272a]"><div class="font-bold text-[13px]">➕ إضافة باص جديد</div><input id="newBusId" class="w-full mt-2 p-2.5 rounded-xl bg-[#0e0e12] border border-[#27272a] text-[12px]" placeholder="B-500 - رقم الباص"><input id="newBusPlate" class="w-full mt-2 p-2.5 rounded-xl bg-[#0e0e12] border border-[#27272a] text-[12px]" placeholder="9-أ 1234 - لوحة"><button onclick="addBus()" class="w-full mt-2 bg-[#d4af37] text-black py-2.5 rounded-full text-[12px] font-black">إضافة الباص +</button></div><div class="bg-[#1e1e22] p-3 rounded-xl border border-[#27272a]"><div class="font-bold text-[13px]">👨‍🎓 إضافة تلميذ جديد</div><input id="newStudent" class="w-full mt-2 p-2.5 rounded-xl bg-[#0e0e12] border border-[#27272a] text-[12px]" placeholder="اسم التلميذ - Aya"><input id="newStudentRoute" class="w-full mt-2 p-2.5 rounded-xl bg-[#0e0e12] border border-[#27272a] text-[12px]" placeholder="Hay Salam - الحي"><button onclick="addStudent()" class="w-full mt-2 bg-[#38bdf8] text-black py-2.5 rounded-full text-[12px] font-black">إضافة التلميذ + QR</button></div></div><div class="bg-[#1e1e22] p-4 rounded-2xl border border-[#27272a]"><div class="font-bold">📊 الإحصائيات الكاملة - Statistiques</div><div class="grid grid-cols-3 gap-3 mt-3 text-center"><div class="bg-[#0e0e12] p-3 rounded-xl border border-[#27272a]"><b class="text-[#d4af37] text-[20px]">4</b><div class="text-[11px] text-[#a1a1aa]">باصات<br>Bus</div></div><div class="bg-[#0e0e12] p-3 rounded-xl border border-[#27272a]"><b class="text-[#38bdf8] text-[20px]">18</b><div class="text-[11px] text-[#a1a1aa]">تلاميذ<br>Élèves</div></div><div class="bg-[#0e0e12] p-3 rounded-xl border border-[#27272a]"><b class="text-[#22c55e] text-[20px]">156</b><div class="text-[11px] text-[#a1a1aa]">رحلات<br>Trajets</div></div></div></div><button onclick="enablePWA()" class="w-full bg-white text-black font-black py-3.5 rounded-full">📲 تثبيت التطبيق على الهاتف - Installer PWA</button><button onclick="resetLang()" class="w-full bg-[#1e1e22] border border-[#27272a] text-[#a1a1aa] font-bold py-3 rounded-full text-[12px]">🔄 إعادة تعيين اللغة - Reset Language (للاختبار)</button></div><div class="zellij"></div></div>
 
 <script>
-let currentLang = localStorage.getItem('wedding_lang') || 'ar';
-let firstTime = localStorage.getItem('wedding_first') === null;
-
-const translations = {
-  ar: {title:"تطبيق العرس 👰🤵", sub:"ارفع صورة أو فيديو باش نصاوبو ليك صورة عرس", upload:"اضغط لرفع صورة العرسان", moroccan:"عرس مغربي", white:"عرس عصري"},
-  fr: {title:"App Mariage 👰🤵", sub:"Téléchargez photo/vidéo pour créer photo mariage", upload:"Cliquez pour télécharger", moroccan:"Mariage Marocain", white:"Mariage Moderne"},
-  en: {title:"Wedding App 👰🤵", sub:"Upload photo/video to create wedding photo", upload:"Click to upload couple photo", moroccan:"Moroccan Wedding", white:"Modern Wedding"}
+let currentLang = localStorage.getItem('transpo_lang') || 'ar';
+let firstTime = localStorage.getItem('transpo_first') === null;
+const translations={
+  ar:{welcome:"مرحباً بك! النقل المدرسي الذكي والآمن في طنجة - Ibn Battouta School",choose:"اختر لغتك / Choisissez votre langue",enter:"دخول إلى التطبيق →",center:"طنجة - مدرسة ابن بطوطة",live:"● رحلات مباشرة • 4 في الطريق • GPS",map:"الخريطة",trips:"تذكرتي",alerts:"التنبيهات",account:"السائق",passTitle:"لوحة الراكب - Passenger",passSub:"آية • الثانية ابتدائي • B-142 • 2.3km",validText:"صالحة حتى يونيو",busNow:"🚌 الباص الآن - Bus Live",etaNow:"يصل بعد 6 دقائق",distanceText:"على بعد 1.2 كم",qrBtn:"QR الخاص بي",alertBtn:"تنبيه الوصول",shareBtn:"مشاركة الموقع",historyTitle:"سجل رحلاتي",parentTitle:"👨‍👩‍👧 لوحة الآباء",notifyParent:"🔔 تنبيه عند الصعود",callDriver:"📞 اتصال بالسائق",closePassBtn:"العودة للخريطة",driverTitle:"لوحة السائق - Driver",driverSub:"B-142 • أحمد • 4.9 ⭐ • 9-ب 1346",todayRoute:"مسار اليوم - Route A",dFrom:"من:",dTo:"إلى:",dStudents:"تلاميذ:",startTrip:"مسح QR - Scan",startTripSub:"مسح حضور التلاميذ",studentsList:"قائمة التلاميذ",studentsSub:"18 حاضر",reportProb:"تبليغ مشكل",reportSub:"عطل، تأخير",fuelText:"الوقود",studentsTitle:"تلاميذ اليوم - 18",closeDriverBtn:"العودة للخريطة",routes:["مسار A - المدرسة → وسط المدينة","مسار B - ملابطا → الثانوية","مسار C - حي السلام → ابن بطوطة","مسار D - المجمع الحسني → ابن بطوطة"]},
+  fr:{welcome:"Bienvenue! Transport scolaire intelligent et sécurisé à Tanger - Ibn Battouta",choose:"Choisissez votre langue / Choose language",enter:"Entrer dans l'app →",center:"Tanger - École Ibn Battouta",live:"● Trajets en direct • 4 en route • GPS",map:"Carte",trips:"Mon Pass",alerts:"Alertes",account:"Chauffeur",passTitle:"Espace Passager - Passenger",passSub:"Aya • CM2 • B-142 • 2.3km",validText:"Valide jusqu'en Juin",busNow:"🚌 Bus maintenant - Live",etaNow:"Arrive dans 6 min",distanceText:"À 1.2 km",qrBtn:"Mon QR",alertBtn:"Alerte arrivée",shareBtn:"Partager pos.",historyTitle:"Historique trajets",parentTitle:"👨‍👩‍👧 Espace Parents",notifyParent:"🔔 Alerte montée",callDriver:"📞 Appeler chauffeur",closePassBtn:"Retour carte",driverTitle:"Tableau Chauffeur - Driver",driverSub:"B-142 • Ahmed • 4.9 ⭐ • 9-ب 1346",todayRoute:"Trajet du jour - Route A",dFrom:"De:",dTo:"Vers:",dStudents:"Élèves:",startTrip:"Scanner QR",startTripSub:"Scanner présence",studentsList:"Liste élèves",studentsSub:"18 présents",reportProb:"Signaler problème",reportSub:"Panne, retard",fuelText:"Carburant",studentsTitle:"Élèves du jour - 18",closeDriverBtn:"Retour carte",routes:["Route A - École → Centre-ville","Route B - Malabata → Lycée","Route C - Hay Salam → Ibn Battouta","Route D - Hay Hassani → Ibn Battouta"]},
+  en:{welcome:"Welcome! Smart & safe school transport in Tangier - Ibn Battouta",choose:"Choose your language / اختر لغتك",enter:"Enter Application →",center:"Tangier - Ibn Battouta School",live:"● Live Trips • 4 en route • GPS Live",map:"Map",trips:"My Pass",alerts:"Alerts",account:"Driver",passTitle:"Passenger Panel",passSub:"Aya • Grade 2 • B-142 • 2.3km",validText:"Valid until June",busNow:"🚌 Bus Now - Live",etaNow:"Arrives in 6 min",distanceText:"1.2 km away",qrBtn:"My QR",alertBtn:"Arrival Alert",shareBtn:"Share Location",historyTitle:"My trip history",parentTitle:"👨‍👩‍👧 Parent Panel",notifyParent:"🔔 Boarding alert",callDriver:"📞 Call driver",closePassBtn:"Back to map",driverTitle:"Driver Dashboard",driverSub:"B-142 • Ahmed • 4.9 ⭐ • 9-ب 1346",todayRoute:"Today's Route - Route A",dFrom:"From:",dTo:"To:",dStudents:"Students:",startTrip:"Scan QR",startTripSub:"Scan student presence",studentsList:"Students List",studentsSub:"18 present",reportProb:"Report Issue",reportSub:"Breakdown, delay",fuelText:"Fuel",studentsTitle:"Today's Students - 18",closeDriverBtn:"Back to map",routes:["Route A - School → Downtown","Route B - Malabata → High School","Route C - Hay Salam → Ibn Battouta","Route D - Hay Hassani → Ibn Battouta"]},
+  es:{welcome:"¡Bienvenido! Transporte escolar inteligente en Tánger - Ibn Battouta",choose:"Elige tu idioma / Choose language",enter:"Entrar a la app →",center:"Tánger - Escuela Ibn Battouta",live:"● Viajes en vivo • 4 en ruta • GPS",map:"Mapa",trips:"Mi Pase",alerts:"Alertas",account:"Conductor",passTitle:"Panel Pasajero",passSub:"Aya • 2º grado • B-142 • 2.3km",validText:"Válido hasta junio",busNow:"🚌 Bus ahora - En vivo",etaNow:"Llega en 6 min",distanceText:"A 1.2 km",qrBtn:"Mi QR",alertBtn:"Alerta llegada",shareBtn:"Compartir",historyTitle:"Historial viajes",parentTitle:"👨‍👩‍👧 Panel Padres",notifyParent:"🔔 Alerta subida",callDriver:"📞 Llamar conductor",closePassBtn:"Volver al mapa",driverTitle:"Panel Conductor",driverSub:"B-142 • Ahmed • 4.9 ⭐",todayRoute:"Ruta de hoy - Ruta A",dFrom:"Desde:",dTo:"Hacia:",dStudents:"Alumnos:",startTrip:"Escanear QR",startTripSub:"Escanear presencia",studentsList:"Lista alumnos",studentsSub:"18 presentes",reportProb:"Reportar",reportSub:"Avería, retraso",fuelText:"Combustible",studentsTitle:"Alumnos de hoy - 18",closeDriverBtn:"Volver al mapa",routes:["Ruta A - Escuela → Centro","Ruta B - Malabata → Liceo","Ruta C - Hay Salam → Ibn Battouta","Ruta D - Hay Hassani → Ibn Battouta"]},
+  ber:{welcome:"Ansuf! Asenqed aɣurbiz aramsaɣ deg Tanjah - Ibn Battouta",choose:"Fren tutlayt nnk / Choose language",enter:"Kchem s app →",center:"Tanja - Asinan Ibn Battouta",live:"● Inig anidir • 4 deg ubrid • GPS",map:"Takart",trips:"Pass inu",alerts:"Iberran",account:"Anahhar",passTitle:"Tafelwit n Umnagh",passSub:"Aya • B-142 • 2.3km",validText:"Valid ar June",busNow:"🚌 Abus tura - Live",etaNow:"Ad yawed deg 6 min",distanceText:"1.2 km",qrBtn:"QR inu",alertBtn:"Aberran",shareBtn:"Bdu amkan",historyTitle:"Amzruy inu",parentTitle:"👨‍👩‍👧 Tafelwit n imawlan",notifyParent:"🔔 Aberran n unyur",callDriver:"📞 Ssiwel i unhhar",closePassBtn:"Uɣal ar takart",driverTitle:"Tafelwit n Unhar",driverSub:"B-142 • Ahmed • 4.9 ⭐",todayRoute:"Abrid n wass - Abrid A",dFrom:"Seg:",dTo:"Ar:",dStudents:"Inelmaden:",startTrip:"Sken QR",startTripSub:"Sken tilawin",studentsList:"Tabdart n inelmaden",studentsSub:"18 deg usmune",reportProb:"Mmel aɣanen",reportSub:"Ahat, aɛettal",fuelText:"Petrol",studentsTitle:"Inelmaden n wass - 18",closeDriverBtn:"Uɣal ar takart",routes:["Abrid A - Asinan → Tamdint","Abrid B - Malabata → Asinan","Abrid C - Hay Salam → Ibn Battouta","Abrid D - Hay Hassani → Ibn Battouta"]}
 };
-
-// إذا ماشي أول مرة، دوز نيشان للتطبيق
-if(!firstTime){
-  document.getElementById('languageScreen').style.display='none';
-  document.getElementById('appScreen').style.display='block';
-  applyLang(currentLang);
-}
-
-function selectLang(lang){
-  currentLang = lang;
-  document.querySelectorAll('.lang-card').forEach(c=>c.classList.remove('active'));
-  document.querySelector(`[data-lang="${lang}"]`).classList.add('active');
-}
-
-function enterApp(){
-  localStorage.setItem('wedding_lang', currentLang);
-  localStorage.setItem('wedding_first', 'done');
-  document.getElementById('languageScreen').style.display='none';
-  document.getElementById('appScreen').style.display='block';
-  applyLang(currentLang);
-}
-
-function applyLang(lang){
-  const t = translations[lang];
-  document.getElementById('appTitle').innerText = t.title;
-  document.getElementById('appSub').innerText = t.sub;
-  document.getElementById('uploadText').innerText = t.upload;
-  document.getElementById('btnMoroccan').innerText = t.moroccan;
-  document.getElementById('btnWhite').innerText = t.white;
-  document.documentElement.lang = lang;
-  document.documentElement.dir = lang==='ar'?'rtl':'ltr';
-}
-
-function handleFile(input){
-  const file = input.files[0];
-  if(!file) return;
-  const url = URL.createObjectURL(file);
-  const gallery = document.getElementById('gallery');
-  gallery.innerHTML = `<div style="background:white;padding:10px;border-radius:15px"><p>تم الرفع ✅</p><img src="${url}" style="width:100%;border-radius:10px;margin-top:10px"></div>`;
-}
-
-function createWedding(type){
-  alert(currentLang==='ar'? `غادي نصاوب ليك صورة ${type==='moroccan'?'عرس مغربي':'عرس عصري'} زوينة!` : `Creating ${type} wedding photo...`);
-  // هنا تزيد كود الـ AI ديالك
-}
+function selectFirstLang(l){currentLang=l;document.querySelectorAll('#firstLangScreen.flag').forEach(f=>f.classList.remove('active'));document.getElementById('ff-'+l)?.classList.add('active');const t=translations[l];document.getElementById('welcomeText').innerText=t.welcome;document.getElementById('chooseLangText').innerText=t.choose;document.getElementById('enterBtn').innerText=t.enter;document.getElementById('codeLang').innerText=`"${l}"`;document.getElementById('lbl-en').className = l==='en'? 'w-[58px] text-[#d4af37] font-bold' : 'w-[58px]';}
+function enterApp(){localStorage.setItem('transpo_lang',currentLang);localStorage.setItem('transpo_first','done');localStorage.removeItem('wedding_lang');localStorage.removeItem('wedding_first');document.getElementById('firstLangScreen').style.display='none';document.getElementById('mainApp').classList.remove('hidden');document.getElementById('mainApp').classList.add('flex');applyTranslations();setTimeout(()=>{if(map) map.invalidateSize();},400);}
+function applyTranslations(){const t=translations[currentLang];document.getElementById('centerLabel').textContent='📍 '+t.center;document.getElementById('liveText').textContent=t.live;document.getElementById('navMap').textContent=t.map;document.getElementById('navTrips').textContent=t.trips;document.getElementById('navAlerts').textContent=t.alerts;document.getElementById('passTitle').textContent=t.passTitle;document.getElementById('passSub').textContent=t.passSub;document.getElementById('busNow').textContent=t.busNow;document.getElementById('etaNow').textContent=t.etaNow;document.getElementById('distanceText').textContent=t.distanceText;document.getElementById('qrBtn').textContent=t.qrBtn;document.getElementById('alertBtn').textContent=t.alertBtn;document.getElementById('shareBtn').textContent=t.shareBtn;document.getElementById('historyTitle').textContent=t.historyTitle;document.getElementById('parentTitle').textContent=t.parentTitle;document.getElementById('closePassBtn').textContent=t.closePassBtn;document.getElementById('driverTitle').textContent=t.driverTitle;document.getElementById('driverSub').textContent=t.driverSub;document.getElementById('todayRoute').textContent=t.todayRoute;document.getElementById('dFrom').textContent=t.dFrom;document.getElementById('dTo').textContent=t.dTo;document.getElementById('dStudents').textContent=t.dStudents;document.getElementById('startTrip').textContent=t.startTrip;document.getElementById('startTripSub').textContent=t.startTripSub;document.getElementById('studentsList').textContent=t.studentsList;document.getElementById('studentsSub').textContent=t.studentsSub;document.getElementById('reportProb').textContent=t.reportProb;document.getElementById('reportSub').textContent=t.reportSub;document.getElementById('fuelText').textContent=t.fuelText;document.getElementById('studentsTitle').textContent=t.studentsTitle;document.getElementById('closeDriverBtn').textContent=t.closeDriverBtn;renderTrips();}
+const trips=[{id:'B-142',lat:35.768,lng:-5.82,c:'#3b82f6',km:'1.2 km',plate:'9-ب 1346',status:'green'},{id:'B-207',lat:35.765,lng:-5.805,c:'#f97316',km:'2.8 km',plate:'7-د 7821',status:'orange'},{id:'B-055',lat:35.755,lng:-5.795,c:'#ef4444',km:'4.5 km',plate:'1-ج 9094',status:'red'},{id:'B-319',lat:35.75,lng:-5.835,c:'#3b82f6',km:'0.9 km',plate:'2-ب 4456',status:'blue'}];
+let map;function init(){map=L.map('map',{zoomControl:false}).setView([35.7595,-5.834],13.5);L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);trips.forEach(tr=>{const html=`<div style="--c:${tr.c}" class="bus-pin"><i class="fa-solid fa-bus"></i><span class="bus-label">${tr.id}</span></div>`;const icon=L.divIcon({className:'',html:html,iconSize:[34,44],iconAnchor:[17,44]});L.marker([tr.lat,tr.lng],{icon}).addTo(map);});renderTrips();renderDriverStudents();}
+function renderTrips(){const c=document.getElementById('tripList');const t=translations[currentLang];c.innerHTML=trips.map((tr,i)=>{const name=t.routes[i]||tr.id;const col=tr.status=='green'?'#22c55e':tr.status=='orange'?'#f97316':tr.status=='red'?'#ef4444':'#3b82f6';const eta=tr.id=='B-142'?'6 min':tr.id=='B-207'?'12 min':tr.id=='B-055'?'18 min':'9 min';return `<div class="route-card" style="--c:${col}"><div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style="background:${col}"><i class="fa-solid fa-bus text-white"></i></div><div class="flex-1 min-w-0"><div class="flex justify-between gap-2"><div class="font-bold text-[13px] truncate">${name}</div><span class="text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap border" style="color:${col};background:${col}22;border-color:${col}55">ETA ${eta} ⏱</span></div><div class="flex gap-3 mt-1"><span class="text-[11px] text-[#d4af37]">Plate: ${tr.plate}</span><span class="text-[11px] text-[#a1a1aa] bg-[#27272a] px-2 rounded-full">👤 ${tr.km}</span></div></div></div>`;}).join('');}
+function renderDriverStudents(){const names=['Aya El Mansouri','Mohamed Ben','Lina Alami','Youssef Tazi','Sara Idrissi','Adam Bennis','Nour El Houda','Anas Farissi','Salma Chraibi','Ilyas Bouchta','Hiba Mansour','Omar Tazi','Rania Alaoui','Karim Fassi','Zineb Amrani','Bilal Oudrhiri','Fatima Zahra','Hamza Lahriri'];const c=document.getElementById('driverStudents');c.innerHTML=names.map((n,i)=>`<div class="flex items-center justify-between bg-[#0e0e12] p-2.5 rounded-xl border border-[#27272a]"><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full bg-[#2a2a30] flex items-center justify-center text-[11px] font-bold">${n[0]}</div><span class="text-[12px] font-bold">${n} • Hay Salam</span></div><span class="text-[10px] ${i<15?'bg-[#22c55e]/20 text-[#22c55e]':'bg-[#f97316]/20 text-[#f97316]'} px-2 py-1 rounded-full font-bold">${i<15?'✓ Present':'◷ En attente'}</span></div>`).join('');}
+function locateMe(){map.setView([35.7595,-5.834],14);}
+function openPassengerPanel(){document.getElementById('passengerPanel').classList.remove('hidden');document.getElementById('passengerPanel').classList.add('flex');}
+function closePassengerPanel(){document.getElementById('passengerPanel').classList.add('hidden');document.getElementById('passengerPanel').classList.remove('flex');}
+function openDriverPanel(){document.getElementById('driverPanel').classList.remove('hidden');document.getElementById('driverPanel').classList.add('flex');}
+function closeDriverPanel(){document.getElementById('driverPanel').classList.add('hidden');document.getElementById('driverPanel').classList.remove('flex');}
+function openAdminPanel(){document.getElementById('adminPanel').classList.remove('hidden');document.getElementById('adminPanel').classList.add('flex');}
+function closeAdminPanel(){document.getElementById('adminPanel').classList.add('hidden');document.getElementById('adminPanel').classList.remove('flex');}
+let html5Qr=null;function openQR(){document.getElementById('qrPanel').classList.remove('hidden');document.getElementById('qrPanel').classList.add('flex');html5Qr=new Html5Qrcode("reader");html5Qr.start({facingMode:"environment"},{fps:10,qrbox:{width:250,height:250}},(decoded)=>{document.getElementById('qrResult').innerText="✓ تم: "+decoded+" - تم تسجيل الحضور + إشعار للأب via WhatsApp";if(navigator.vibrate) navigator.vibrate(200);setTimeout(closeQR,2500);},()=>{}).catch(()=>{document.getElementById('qrResult').innerText="الكاميرا غير متاحة - جرب من الهاتف، ماشي PC";});}
+function closeQR(){if(html5Qr){html5Qr.stop().then(()=>{document.getElementById('qrPanel').classList.add('hidden');document.getElementById('qrPanel').classList.remove('flex');}).catch(()=>{document.getElementById('qrPanel').classList.add('hidden');});}else{document.getElementById('qrPanel').classList.add('hidden');document.getElementById('qrPanel').classList.remove('flex');}}
+function addBus(){const id=document.getElementById('newBusId').value;const plate=document.getElementById('newBusPlate').value||'جديد';if(!id) return alert("اكتب رقم الباص");trips.push({id:id,lat:35.759+Math.random()*0.02,lng:-5.834+Math.random()*0.02,c:'#3b82f6',km:'0.5 km',plate:plate,status:'green'});renderTrips();alert("✅ تمت إضافة الباص "+id+" - "+plate);}
+function addStudent(){const n=document.getElementById('newStudent').value;const r=document.getElementById('newStudentRoute').value||'Hay Salam';if(!n) return alert("اكتب اسم التلميذ");alert("✅ تمت إضافة التلميذ "+n+" ("+r+")\nQR: TRP-"+Math.floor(Math.random()*9000)+"\nتم إرسال بطاقة PASS للأب");document.getElementById('newStudent').value='';}
+function enablePWA(){alert("📲 لتثبيت التطبيق على الهاتف:\n1. افتح الموقع في Chrome على هاتفك\n2. برك على 3 نقاط فوق على اليمين\n3. اختر 'Add to Home screen' أو 'تثبيت التطبيق' أو 'Installer l'application'\n4. غادي يولي عندك أيقونة Transpo PRO فالشاشة بحال واتساب!");if('serviceWorker' in navigator){const swCode=`self.addEventListener('install',e=>{self.skipWaiting()});self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)))})`;const blob=new Blob([swCode],{type:'text/javascript'});const url=URL.createObjectURL(blob);navigator.serviceWorker.register(url);}}
+function resetLang(){localStorage.removeItem('transpo_lang');localStorage.removeItem('transpo_first');location.reload();}
+if(localStorage.getItem('transpo_first')){document.getElementById('firstLangScreen').style.display='none';document.getElementById('mainApp').classList.remove('hidden');document.getElementById('mainApp').classList.add('flex');}
+selectFirstLang(currentLang);init();setTimeout(()=>{if(map) map.invalidateSize();},600);
 </script>
 </body>
-</html>
+ </html>
