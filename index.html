@@ -1,482 +1,113 @@
- 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Transpo PRO Tanger</title>
-
-  <!-- Leaflet CSS & JS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Font Awesome -->
-  <link
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    rel="stylesheet"
-  />
-
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@700;900&family=Inter:wght@600;700&display=swap');
-
-    * {
-      font-family: 'Inter', 'Tajawal', sans-serif;
-    }
-
-    /* Decorative gradient bar with symbols */
-    .zellij {
-      height: 22px;
-      background: linear-gradient(90deg, #d4af37, #f9e076, #d4af37);
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .zellij:before {
-      content: "◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈";
-      color: #1a1200;
-      font-size: 10px;
-      letter-spacing: 3px;
-      white-space: nowrap;
-    }
-
-    /* Bus marker pin style */
-    .bus-pin {
-      width: 34px;
-      height: 44px;
-      background: var(--c);
-      border-radius: 50% 50% 50% 0;
-      transform: rotate(-45deg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-      border: 2px solid white;
-    }
-
-    .bus-pin i {
-      transform: rotate(45deg);
-      color: white;
-      font-size: 14px;
-    }
-
-    /* Label on bus pin */
-    .bus-label {
-      position: absolute;
-      left: 28px;
-      top: -6px;
-      background: var(--c);
-      color: white;
-      font-size: 11px;
-      font-weight: 900;
-      padding: 3px 8px;
-      border-radius: 999px;
-      white-space: nowrap;
-      transform: rotate(45deg);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-    }
-
-    /* Language flag buttons */
-    .flag {
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      border: 2px solid #d4af37;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
-      cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .flag.active {
-      box-shadow: 0 0 0 4px #d4af37, 0 4px 16px rgba(212, 175, 55, 0.5);
-      transform: scale(1.08);
-    }
-
-    /* Route card style */
-    .route-card {
-      background: #1e1e22;
-      border-radius: 16px;
-      padding: 14px;
-      display: flex;
-      gap: 12px;
-      border-left: 4px solid var(--c);
-      margin-bottom: 10px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تطبيق العرس - Wedding App</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma}
+  body{background:linear-gradient(135deg,#fff0f5,#ffe4e1);min-height:100vh}
+  #languageScreen{position:fixed;inset:0;background:linear-gradient(135deg,#ff9a9e,#fecfef);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000}
+  .lang-card{background:white;padding:20px 30px;border-radius:20px;margin:10px;cursor:pointer;box-shadow:0 5px 15px rgba(0,0,0,.1);transition:.3s;border:3px solid transparent;text-align:center}
+  .lang-card:hover,.lang-card.active{border-color:#ff4081;transform:scale(1.05)}
+  .lang-card span{font-size:40px}
+  .btn{background:#ff4081;color:white;border:none;padding:15px 50px;border-radius:30px;font-size:18px;cursor:pointer;margin-top:30px;box-shadow:0 5px 15px rgba(255,64,129,.4)}
+  #appScreen{display:none;padding:20px}
+  .header{background:white;padding:20px;border-radius:20px;text-align:center;box-shadow:0 5px 15px rgba(0,0,0,.05);margin-bottom:20px}
+  .upload-box{border:3px dashed #ff4081;border-radius:20px;padding:40px;text-align:center;background:white;cursor:pointer}
+  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:15px;margin-top:20px}
+  .gallery img{width:100%;border-radius:15px;box-shadow:0 5px 10px rgba(0,0,0,.1)}
+</style>
 </head>
+<body>
 
-<body class="bg-[#0e0e12] text-white overflow-hidden h-[100vh] flex flex-col">
-  <!-- Decorative top bar -->
-  <div class="zellij"></div>
+<!-- 1 - واجهة اللغة فقط - كتبان أول مرة -->
+<div id="languageScreen">
+  <h1 style="color:white;font-size:50px;margin-bottom:10px">💖</h1>
+  <h2 style="color:white;margin-bottom:30px">اختر لغتك / Choisissez / Choose Language</h2>
+  <div style="display:flex;flex-wrap:wrap;justify-content:center">
+    <div class="lang-card active" data-lang="ar" onclick="selectLang('ar')"><span>🇲🇦</span><br><b>العربية</b></div>
+    <div class="lang-card" data-lang="fr" onclick="selectLang('fr')"><span>🇫🇷</span><br><b>Français</b></div>
+    <div class="lang-card" data-lang="en" onclick="selectLang('en')"><span>🇬🇧</span><br><b>English</b></div>
+  </div>
+  <button class="btn" onclick="enterApp()">دخول - Entrer - Enter</button>
+</div>
 
-  <!-- Header with logo and controls -->
-  <div class="bg-[#121218] px-4 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div
-        class="w-10 h-10 bg-[#1e1e22] rounded-xl flex items-center justify-center text-[#d4af37]"
-      >
-        <i class="fa-solid fa-bus text-xl"></i>
-      </div>
-      <div>
-        <div class="font-black text-[17px]">
-          Transpo <span class="text-[#d4af37]">PRO</span>
-        </div>
-        <div class="text-[13px] text-[#d4af37] font-bold">Tanger</div>
-      </div>
-    </div>
-    <div class="flex gap-4 items-center text-[#a1a1aa]">
-      <button class="w-8 h-8 flex items-center justify-center" aria-label="Notifications">
-        <i class="fa-solid fa-bell text-[#d4af37]"></i>
-      </button>
-      <button class="w-8 h-8 flex items-center justify-center" aria-label="Search">
-        <i class="fa-solid fa-magnifying-glass"></i>
-      </button>
-      <button
-        class="w-8 h-8 rounded-full bg-[#2a2a30] flex items-center justify-center text-xs font-bold border border-[#d4af37]"
-        aria-label="User Profile"
-      >
-        ME
-      </button>
-    </div>
+<!-- 2 - باقي التطبيق -->
+<div id="appScreen">
+  <div class="header">
+    <h1 id="appTitle">تطبيق العرس 👰🤵</h1>
+    <p id="appSub">ارفع صورة أو فيديو باش نصاوبو ليك صورة عرس</p>
   </div>
 
-  <!-- Decorative smaller bar -->
-  <div class="zellij" style="height: 14px"></div>
-
-  <!-- Language selection flags -->
-  <div
-    class="bg-[#18181d] px-2 py-4 flex justify-between gap-2"
-    role="group"
-    aria-label="Language selection"
-  >
-    <button onclick="setLang('ar')" class="flag active" id="f-ar" aria-pressed="false" aria-label="Arabic">🇲🇦</button>
-    <button onclick="setLang('fr')" class="flag" id="f-fr" aria-pressed="false" aria-label="Français">🇫🇷</button>
-    <button onclick="setLang('en')" class="flag" id="f-en" aria-pressed="true" aria-label="English">🇬🇧</button>
-    <button onclick="setLang('es')" class="flag" id="f-es" aria-pressed="false" aria-label="Español">🇪🇸</button>
-    <button onclick="setLang('ber')" class="flag" id="f-ber" aria-pressed="false" aria-label="Berber">ⵜ</button>
+  <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+    <p style="font-size:40px">📸</p>
+    <p id="uploadText">اضغط لرفع صورة العرسان</p>
+    <input type="file" id="fileInput" hidden accept="image/*,video/*" onchange="handleFile(this)">
   </div>
 
-  <!-- Language names below flags -->
-  <div
-    class="bg-[#18181d] px-3 pb-2 flex justify-between text-[10px] text-[#a1a1aa] text-center"
-  >
-    <span class="w-[58px]">العربية</span>
-    <span class="w-[58px]">Français</span>
-    <span class="w-[58px] text-[#d4af37] font-bold">English</span>
-    <span class="w-[58px]">Español</span>
-    <span class="w-[58px]">ⵜⴰⵎⴰⵣⵉⵖⵜ</span>
+  <div style="margin-top:20px;display:flex;gap:10px">
+    <button class="btn" style="flex:1" onclick="createWedding('moroccan')" id="btnMoroccan">عرس مغربي</button>
+    <button class="btn" style="flex:1;background:#6c63ff" onclick="createWedding('white')" id="btnWhite">عرس عصري</button>
   </div>
 
-  <!-- Map container -->
-  <div class="flex-1 relative">
-    <div id="map" class="absolute inset-0 z-0"></div>
+  <div class="gallery" id="gallery"></div>
+</div>
 
-    <!-- Zoom controls -->
-    <div
-      class="absolute right-3 top-20 z-[400] flex flex-col gap-2"
-      role="group"
-      aria-label="Zoom controls"
-    >
-      <button
-        onclick="map.zoomIn()"
-        class="w-11 h-11 rounded-2xl bg-[#1e1e22] border-2 border-[#d4af37] text-white flex items-center justify-center text-xl font-bold"
-        aria-label="Zoom in"
-      >
-        +
-      </button>
-      <button
-        onclick="map.zoomOut()"
-        class="w-11 h-11 rounded-2xl bg-[#1e1e22] border-2 border-[#d4af37] text-white flex items-center justify-center text-xl font-bold"
-        aria-label="Zoom out"
-      >
-        &minus;
-      </button>
-    </div>
+<script>
+let currentLang = localStorage.getItem('wedding_lang') || 'ar';
+let firstTime = localStorage.getItem('wedding_first') === null;
 
-    <!-- Locate me button -->
-    <button
-      onclick="locateMe()"
-      class="absolute right-3 bottom-[200px] z-[400] w-12 h-12 rounded-full bg-[#1e1e22] border-2 border-[#d4af37] text-[#d4af37] flex items-center justify-center"
-      aria-label="Locate me"
-    >
-      <i class="fa-solid fa-location-dot text-xl"></i>
-    </button>
+const translations = {
+  ar: {title:"تطبيق العرس 👰🤵", sub:"ارفع صورة أو فيديو باش نصاوبو ليك صورة عرس", upload:"اضغط لرفع صورة العرسان", moroccan:"عرس مغربي", white:"عرس عصري"},
+  fr: {title:"App Mariage 👰🤵", sub:"Téléchargez photo/vidéo pour créer photo mariage", upload:"Cliquez pour télécharger", moroccan:"Mariage Marocain", white:"Mariage Moderne"},
+  en: {title:"Wedding App 👰🤵", sub:"Upload photo/video to create wedding photo", upload:"Click to upload couple photo", moroccan:"Moroccan Wedding", white:"Modern Wedding"}
+};
 
-    <!-- Center label -->
-    <div
-      id="centerLabel"
-      class="absolute left-1/2 top-[46%] -translate-x-1/2 z-[400] bg-[#1e1e22]/90 px-3 py-1.5 rounded-full text-[11px] font-bold border border-white/20 whitespace-nowrap"
-      aria-live="polite"
-      aria-atomic="true"
-    >
-      📍 Tanger - Ibn Battouta School
-    </div>
-  </div>
+// إذا ماشي أول مرة، دوز نيشان للتطبيق
+if(!firstTime){
+  document.getElementById('languageScreen').style.display='none';
+  document.getElementById('appScreen').style.display='block';
+  applyLang(currentLang);
+}
 
-  <!-- Bottom panel with trip list and navigation -->
-  <div
-    class="bg-[#15151a] rounded-t-[24px] -mt-6 z-10 relative border-t border-[#2a2a30] max-h-[46vh] flex flex-col"
-  >
-    <div class="flex justify-center pt-3 pb-2">
-      <div class="w-12 h-1.5 bg-[#3f3f46] rounded-full"></div>
-    </div>
+function selectLang(lang){
+  currentLang = lang;
+  document.querySelectorAll('.lang-card').forEach(c=>c.classList.remove('active'));
+  document.querySelector(`[data-lang="${lang}"]`).classList.add('active');
+}
 
-    <div id="tripList" class="overflow-auto px-3 pb-2 flex-1"></div>
+function enterApp(){
+  localStorage.setItem('wedding_lang', currentLang);
+  localStorage.setItem('wedding_first', 'done');
+  document.getElementById('languageScreen').style.display='none';
+  document.getElementById('appScreen').style.display='block';
+  applyLang(currentLang);
+}
 
-    <div
-      class="px-4 py-2 flex items-center justify-between text-[13px] font-black text-[#d4af37]"
-      aria-live="polite"
-    >
-      <span>● Live Trips • 4 en route</span>
-    </div>
+function applyLang(lang){
+  const t = translations[lang];
+  document.getElementById('appTitle').innerText = t.title;
+  document.getElementById('appSub').innerText = t.sub;
+  document.getElementById('uploadText').innerText = t.upload;
+  document.getElementById('btnMoroccan').innerText = t.moroccan;
+  document.getElementById('btnWhite').innerText = t.white;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang==='ar'?'rtl':'ltr';
+}
 
-    <div
-      class="bg-[#0e0e12] border-t border-[#27272a] grid grid-cols-4 py-2 px-2"
-      role="navigation"
-      aria-label="Main navigation"
-    >
-      <button
-        class="flex flex-col items-center gap-1 text-[#d4af37]"
-        aria-current="page"
-        aria-label="Carte"
-      >
-        <i class="fa-solid fa-location-dot text-[18px]"></i>
-        <span class="text-[11px] font-bold">Carte</span>
-        <span class="w-1.5 h-1.5 bg-[#d4af37] rounded-full"></span>
-      </button>
-      <button class="flex flex-col items-center gap-1 text-[#71717a]" aria-label="Trajets">
-        <i class="fa-solid fa-list text-[18px]"></i>
-        <span class="text-[11px]">Trajets</span>
-      </button>
-      <button
-        class="flex flex-col items-center gap-1 text-[#71717a] relative"
-        aria-label="Alertes"
-      >
-        <i class="fa-solid fa-bell text-[18px]"></i>
-        <span
-          class="absolute -top-1 right-5 bg-[#f97316] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold"
-          >2</span
-        >
-        <span class="text-[11px]">Alertes</span>
-      </button>
-      <button class="flex flex-col items-center gap-1 text-[#71717a]" aria-label="Compte">
-        <i class="fa-solid fa-user text-[18px]"></i>
-        <span class="text-[11px]">Compte</span>
-      </button>
-    </div>
-  </div>
+function handleFile(input){
+  const file = input.files[0];
+  if(!file) return;
+  const url = URL.createObjectURL(file);
+  const gallery = document.getElementById('gallery');
+  gallery.innerHTML = `<div style="background:white;padding:10px;border-radius:15px"><p>تم الرفع ✅</p><img src="${url}" style="width:100%;border-radius:10px;margin-top:10px"></div>`;
+}
 
-  <!-- Decorative bottom bar -->
-  <div class="zellij"></div>
-
-  <script>
-    // Current language
-    let lang = 'en';
-
-    // Translations and routes by language
-    const t = {
-      ar: {
-        a: 'طنجة - ابن بطوطة',
-        routes: [
-          'مسار A - مدرسة → وسط المدينة',
-          'مسار B - ملابطا → ثانوية',
-          'مسار C - حي السلام → ابن بطوطة',
-        ],
-      },
-      fr: {
-        a: 'Tanger - Ibn Battouta',
-        routes: [
-          'Route A - École → Centre-ville',
-          'Route B - Malabata → Lycée',
-          'Route C - Hay Salam → Ibn Battouta',
-        ],
-      },
-      en: {
-        a: 'Tanger - Ibn Battouta',
-        routes: [
-          'Route A - École → Centre-ville',
-          'Route B - Malabata → Lycée',
-          'Route C - Hay Salam → Ibn Battouta',
-        ],
-      },
-      es: {
-        a: 'Tanger - Ibn Battouta',
-        routes: [
-          'Ruta A - Escuela → Centro',
-          'Ruta B - Malabata → Liceo',
-          'Ruta C - Hay Salam → Ibn Battouta',
-        ],
-      },
-      ber: {
-        a: 'Tanger - Ibn Battouta',
-        routes: [
-          'Abrid A - Asinan → Tamdint',
-          'Abrid B - Malabata → Asinan',
-          'Abrid C - Hay Salam → Ibn Battouta',
-        ],
-      },
-    };
-
-    // Set language and update UI accordingly
-    function setLang(l) {
-      lang = l;
-      document.querySelectorAll('.flag').forEach((f) => {
-        f.classList.remove('active');
-        f.setAttribute('aria-pressed', 'false');
-      });
-      const activeFlag = document.getElementById('f-' + l);
-      if (activeFlag) {
-        activeFlag.classList.add('active');
-        activeFlag.setAttribute('aria-pressed', 'true');
-      }
-      document.getElementById('centerLabel').textContent = '📍 ' + t[l].a;
-      renderTrips();
-    }
-
-    // Sample trips data
-    const trips = [
-      {
-        id: 'B-142',
-        lat: 35.768,
-        lng: -5.82,
-        c: '#3b82f6',
-        km: '1.2 km',
-        plate: '9-ب 1346',
-        status: 'green',
-      },
-      {
-        id: 'B-207',
-        lat: 35.765,
-        lng: -5.805,
-        c: '#f97316',
-        km: '2.8 km',
-        plate: '7-د 7821',
-        status: 'orange',
-      },
-      {
-        id: 'B-055',
-        lat: 35.755,
-        lng: -5.795,
-        c: '#ef4444',
-        km: '4.5 km',
-        plate: '1-ج 9094',
-        status: 'red',
-      },
-      {
-        id: 'B-319',
-        lat: 35.75,
-        lng: -5.835,
-        c: '#3b82f6',
-        km: '0.9 km',
-        plate: '2-ب 4456',
-        status: 'blue',
-      },
-    ];
-
-    let map;
-
-    // Initialize the map and markers
-    function init() {
-      map = L.map('map', { zoomControl: false }).setView([35.7595, -5.834], 13.5);
-
-      L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-        {
-          maxZoom: 19,
-          attribution:
-            '&copy; <a href="https://carto.com/">CARTO</a> contributors',
-        }
-      ).addTo(map);
-
-      trips.forEach((tr) => {
-        const html = `
-          <div style="--c:${tr.c}" class="bus-pin">
-            <i class="fa-solid fa-bus"></i>
-            <span class="bus-label">${tr.id}</span>
-          </div>
-        `;
-        const icon = L.divIcon({
-          className: '',
-          html: html,
-          iconSize: [34, 44],
-          iconAnchor: [17, 44],
-        });
-        L.marker([tr.lat, tr.lng], { icon }).addTo(map);
-      });
-
-      renderTrips();
-    }
-
-    // Render trip cards in the list
-    function renderTrips() {
-      const container = document.getElementById('tripList');
-      container.innerHTML = trips
-        .slice(0, 3)
-        .map((tr, i) => {
-          const name = t[lang]?.routes[i] || tr.id;
-          const col =
-            tr.status === 'green'
-              ? '#22c55e'
-              : tr.status === 'orange'
-              ? '#f97316'
-              : '#ef4444';
-          const eta =
-            tr.id === 'B-142'
-              ? '6 min'
-              : tr.id === 'B-207'
-              ? '12 min'
-              : '18 min';
-          return `
-            <div class="route-card" style="--c:${col}">
-              <div
-                class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                style="background:${col}"
-              >
-                <i class="fa-solid fa-bus text-white"></i>
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex justify-between gap-2">
-                  <div class="font-bold text-[13px] truncate">${name}</div>
-                  <span
-                    class="text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap border"
-                    style="color:${col};background:${col}22;border-color:${col}55"
-                    >ETA ${eta} ⏱</span
-                  >
-                </div>
-                <div class="flex gap-3 mt-1">
-                  <span class="text-[11px] text-[#d4af37]">Plate: ${tr.plate}</span>
-                  <span
-                    class="text-[11px] text-[#a1a1aa] bg-[#27272a] px-2 rounded-full"
-                    >👤 ${tr.km}</span
-                  >
-                </div>
-              </div>
-            </div>
-          `;
-        })
-        .join('');
-    }
-
-    // Center map on predefined location
-    function locateMe() {
-      map.setView([35.7595, -5.834], 14);
-    }
-
-    // Initialize map on page load
-    window.onload = init;
-  </script>
+function createWedding(type){
+  alert(currentLang==='ar'? `غادي نصاوب ليك صورة ${type==='moroccan'?'عرس مغربي':'عرس عصري'} زوينة!` : `Creating ${type} wedding photo...`);
+  // هنا تزيد كود الـ AI ديالك
+}
+</script>
 </body>
 </html>
- 
