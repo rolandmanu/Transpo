@@ -1,51 +1,81 @@
 
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Transpo Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Transpo PRO Tanger</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
-<style>@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@700&display=swap');*{font-family:'Tajawal',sans-serif}.map-dot{width:18px;height:18px;border-radius:50%;border:3px solid white}.anim-pulse{animation:pulse 2s infinite}@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.2)}100%{transform:scale(1)}}</style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@700;900&family=Inter:wght@600;700&display=swap');
+*{font-family:'Inter','Tajawal',sans-serif}
+.zellij{height:22px;background:linear-gradient(90deg,#d4af37,#f9e076,#d4af37);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.zellij:before{content:"◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈ ◇ ⬙ ◇ ◈";color:#1a1200;font-size:10px;letter-spacing:3px;white-space:nowrap}
+.bus-pin{width:34px;height:44px;background:var(--c);border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.5);border:2px solid white}
+.bus-pin i{transform:rotate(45deg);color:white;font-size:14px}
+.bus-label{position:absolute;left:28px;top:-6px;background:var(--c);color:white;font-size:11px;font-weight:900;padding:3px 8px;border-radius:999px;white-space:nowrap;transform:rotate(45deg);box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.flag{width:58px;height:58px;border-radius:50%;border:2px solid #d4af37;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 0 3px rgba(212,175,55,.2)}
+.flag.active{box-shadow:0 0 0 4px #d4af37, 0 4px 16px rgba(212,175,55,.5);transform:scale(1.08)}
+.route-card{background:#1e1e22;border-radius:16px;padding:14px;display:flex;gap:12px;border-left:4px solid var(--c);margin-bottom:10px}
+</style>
 </head>
-<body class="bg-[#f6f7fb]">
-<div id="screen-lang" style="position:fixed;inset:0;z-index:100;background:#111;color:white;padding:24px;display:flex;flex-direction:column">
-<h1 style="font-size:36px;font-weight:900">Transpo<span style="color:#facc15">PRO</span></h1>
-<p style="color:#aaa">نقل مدرسي + حافلات - طنجة</p>
-<h2 style="font-size:20px;font-weight:700;margin:20px 0">اختر لغتك</h2>
-<button onclick="setLang('ar')" style="background:white;color:black;padding:16px;border-radius:16px;width:100%;margin-bottom:12px;font-weight:900">🇲🇦 العربية</button>
-<button onclick="setLang('fr')" style="background:#27272a;color:white;padding:16px;border-radius:16px;width:100%;margin-bottom:12px">🇫🇷 Français</button>
-<button onclick="setLang('en')" style="background:#27272a;color:white;padding:16px;border-radius:16px;width:100%;margin-bottom:12px">🇬🇧 English</button>
-<button onclick="setLang('es')" style="background:#27272a;color:white;padding:16px;border-radius:16px;width:100%;margin-bottom:12px">🇪🇸 Español</button>
-<button onclick="setLang('ber')" style="background:#27272a;color:white;padding:16px;border-radius:16px;width:100%">ⵣ ⵜⴰⵎⴰⵣⵉⵖⵜ</button>
+<body class="bg-[#0e0e12] text-white overflow-hidden h-[100vh] flex flex-col">
+<div class="zellij"></div>
+<div class="bg-[#121218] px-4 py-3 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-[#1e1e22] rounded-xl flex items-center justify-center text-[#d4af37]"><i class="fa-solid fa-bus text-xl"></i></div>
+<div><div class="font-black text-[17px]">Transpo <span class="text-[#d4af37]">PRO</span></div><div class="text-[13px] text-[#d4af37] font-bold">Tanger</div></div>
 </div>
-<div id="screen-login" style="position:fixed;inset:0;z-index:90;background:white;padding:24px;display:none;flex-direction:column">
-<div style="margin-top:60px"><h2 style="font-size:28px;font-weight:900">دخل كود الدخول</h2><p style="color:#666">أي كود يخدم - 15 يوم فابور</p>
-<input id="accessCode" style="margin-top:32px;width:100%;padding:20px;border-radius:16px;border:2px solid #e4e4e7;text-align:center;font-size:24px;font-weight:900" placeholder="TRIAL-15">
-<button onclick="checkCode()" style="margin-top:24px;width:100%;background:black;color:white;padding:20px;border-radius:16px;font-weight:900;font-size:18px">دخول →</button>
-</div></div>
-<div id="screen-sub" style="position:fixed;inset:0;z-index:80;background:#f6f7fb;display:none;overflow:auto;padding:20px">
-<div style="background:black;color:white;padding:20px;border-radius:24px"><h3 style="font-weight:900">⏳ فترتك التجريبية</h3><p id="trialDays" style="color:#facc15">باقي 15 يوم</p></div>
-<h2 style="font-size:22px;font-weight:900;margin:16px 0">اختار الاشتراك</h2>
-<button onclick="subscribe('rider')" style="width:100%;background:black;color:white;padding:16px;border-radius:12px;font-weight:700;margin-bottom:12px">راكب - 10 د.م / شهر</button>
-<button onclick="subscribe('driver')" style="width:100%;background:#facc15;color:black;padding:16px;border-radius:12px;font-weight:700;margin-bottom:12px">سائق - 13 د.م / شهر</button>
-<button onclick="continueTrial()" style="width:100%;color:#777;padding:12px">كمل فابور دابا</button>
+<div class="flex gap-4 items-center text-[#a1a1aa]">
+<button class="w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-bell text-[#d4af37]"></i></button>
+<button class="w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-magnifying-glass"></i></button>
+<button class="w-8 h-8 rounded-full bg-[#2a2a30] flex items-center justify-center text-xs font-bold border border-[#d4af37]">ME</button>
 </div>
-<div id="app" style="display:none;height:100vh;flex-direction:column"><div style="background:black;color:white;padding:12px;display:flex;justify-content:space-between"><b>راكب - Transpo</b><span style="background:#facc15;color:black;font-size:10px;padding:2px 8px;border-radius:999px">TRIAL</span></div><div id="map" style="flex:1"></div><div style="background:white;border-radius:24px 24px 0 0;margin-top:-24px;z-index:10;max-height:55vh;overflow:auto"><div style="display:flex;gap:8px;padding:16px"><button onclick="switchTab('map')" style="flex:1;background:black;color:white;padding:10px;border-radius:12px">🗺 خريطة</button><button onclick="switchTab('list')" style="flex:1;background:#eee;padding:10px;border-radius:12px">📋 لائحة</button><button onclick="requestRide()" style="flex:1;background:#facc15;padding:10px;border-radius:12px">📍 طلب</button></div><div id="panel-map"><div id="tripList" style="padding:0 16px 16px;display:grid;gap:8px"></div></div><div id="panel-list" style="display:none;padding:16px"><div style="background:#fafafa;padding:16px;border-radius:16px"><b>سائق: محمد - حافلة 12</b><br><span style="font-size:12px">لوحة: 12345</span><div style="display:flex;gap:8px;margin-top:12px"><button onclick="notifyDriver()" style="flex:1;background:black;color:white;padding:12px;border-radius:12px">🔔 نبه السائق</button></div></div></div></div></div>
+</div>
+<div class="zellij" style="height:14px"></div>
+<div class="bg-[#18181d] px-2 py-4 flex justify-between gap-2">
+<button onclick="setLang('ar')" class="flag active" id="f-ar">🇲🇦</button>
+<button onclick="setLang('fr')" class="flag" id="f-fr">🇫🇷</button>
+<button onclick="setLang('en')" class="flag" id="f-en">🇬🇧</button>
+<button onclick="setLang('es')" class="flag" id="f-es">🇪🇸</button>
+<button onclick="setLang('ber')" class="flag" id="f-ber">ⵜ</button>
+</div>
+<div class="bg-[#18181d] px-3 pb-2 flex justify-between text-[10px] text-[#a1a1aa] text-center">
+<span class="w-[58px]">العربية</span><span class="w-[58px]">Français</span><span class="w-[58px] text-[#d4af37] font-bold">English</span><span class="w-[58px]">Español</span><span class="w-[58px]">ⵜⴰⵎⴰⵣⵉⵖⵜ</span>
+</div>
+<div class="flex-1 relative">
+<div id="map" class="absolute inset-0 z-0"></div>
+<div class="absolute right-3 top-20 z-[400] flex flex-col gap-2">
+<button onclick="map.zoomIn()" class="w-11 h-11 rounded-2xl bg-[#1e1e22] border-2 border-[#d4af37] text-white flex items-center justify-center text-xl font-bold">+</button>
+<button onclick="map.zoomOut()" class="w-11 h-11 rounded-2xl bg-[#1e1e22] border-2 border-[#d4af37] text-white flex items-center justify-center text-xl font-bold">−</button>
+</div>
+<button onclick="locateMe()" class="absolute right-3 bottom-[200px] z-[400] w-12 h-12 rounded-full bg-[#1e1e22] border-2 border-[#d4af37] text-[#d4af37] flex items-center justify-center"><i class="fa-solid fa-location-dot text-xl"></i></button>
+<div id="centerLabel" class="absolute left-1/2 top-[46%] -translate-x-1/2 z-[400] bg-[#1e1e22]/90 px-3 py-1.5 rounded-full text-[11px] font-bold border border-white/20 whitespace-nowrap">📍 Tanger - Ibn Battouta School</div>
+</div>
+<div class="bg-[#15151a] rounded-t-[24px] -mt-6 z-10 relative border-t border-[#2a2a30] max-h-[46vh] flex flex-col">
+<div class="flex justify-center pt-3 pb-2"><div class="w-12 h-1.5 bg-[#3f3f46] rounded-full"></div></div>
+<div id="tripList" class="overflow-auto px-3 pb-2 flex-1"></div>
+<div class="px-4 py-2 flex items-center justify-between text-[13px] font-black text-[#d4af37]"><span>● Live Trips • 4 en route</span></div>
+<div class="bg-[#0e0e12] border-t border-[#27272a] grid grid-cols-4 py-2 px-2">
+<button class="flex flex-col items-center gap-1 text-[#d4af37]"><i class="fa-solid fa-location-dot text-[18px]"></i><span class="text-[11px] font-bold">Carte</span><span class="w-1.5 h-1.5 bg-[#d4af37] rounded-full"></span></button>
+<button class="flex flex-col items-center gap-1 text-[#71717a]"><i class="fa-solid fa-list text-[18px]"></i><span class="text-[11px]">Trajets</span></button>
+<button class="flex flex-col items-center gap-1 text-[#71717a] relative"><i class="fa-solid fa-bell text-[18px]"></i><span class="absolute -top-1 right-5 bg-[#f97316] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">2</span><span class="text-[11px]">Alertes</span></button>
+<button class="flex flex-col items-center gap-1 text-[#71717a]"><i class="fa-solid fa-user text-[18px]"></i><span class="text-[11px]">Compte</span></button>
+</div>
+</div>
+<div class="zellij"></div>
 <script>
-function setLang(l){localStorage.setItem('lang',l);document.getElementById('screen-lang').style.display='none';document.getElementById('screen-login').style.display='flex';}
-function checkCode(){let c=document.getElementById('accessCode').value;if(!c){alert('دخل كود');return;}localStorage.setItem('access_code',c);if(!localStorage.getItem('trial_start'))localStorage.setItem('trial_start',Date.now());document.getElementById('screen-login').style.display='none';checkTrial();}
-function checkTrial(){let start=parseInt(localStorage.getItem('trial_start')||Date.now());let daysLeft=15-Math.floor((Date.now()-start)/86400000);if(daysLeft<=0){document.getElementById('screen-sub').style.display='block';}else{document.getElementById('trialDays').textContent='باقي '+daysLeft+' يوم';startApp();}}
-function subscribe(p){localStorage.setItem('plan',p);alert('تم ✅');startApp();}
-function continueTrial(){startApp();}
-let map;function startApp(){document.getElementById('screen-sub').style.display='none';document.getElementById('screen-lang').style.display='none';document.getElementById('screen-login').style.display='none';document.getElementById('app').style.display='flex';setTimeout(initMap,500);}
-function initMap(){if(map)return;map=L.map('map',{zoomControl:false}).setView([35.7595,-5.834],13);L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);const trips=[{id:1,lat:35.76,lng:-5.82,color:'#10b981',name:'مدرسة النور - خط 1',plate:'A 1234',driver:'أحمد',eta:'3 د',dist:'0.8km'},{id:2,lat:35.77,lng:-5.85,color:'#f59e0b',name:'الحي الجامعي',plate:'B 5678',driver:'حسن',eta:'7 د',dist:'2.1km'},{id:3,lat:35.74,lng:-5.81,color:'#ef4444',name:'فري زون عمال',plate:'C 9012',driver:'كريم',eta:'تأخر',dist:'1.5km'},{id:4,lat:35.75,lng:-5.80,color:'#3b82f6',name:'طاكسي كبير',plate:'D 3456',driver:'يوسف',eta:'1 د',dist:'0.3km'}];let html='';trips.forEach(tr=>{let icon=L.divIcon({className:'',html:`<div style="background:${tr.color}" class="map-dot anim-pulse"></div>`});L.marker([tr.lat,tr.lng],{icon}).addTo(map).bindPopup(tr.name);html+=`<div style="background:white;padding:12px;border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1);display:flex;justify-content:space-between;border-left:5px solid ${tr.color}"><div><b>${tr.name}</b><br><span style="font-size:11px;color:#777">${tr.plate} • ${tr.driver} • ${tr.dist} • ${tr.eta}</span></div><span style="font-size:11px;background:${tr.color}20;padding:4px 8px;border-radius:999px;height:fit-content">${tr.eta}</span></div>`;});document.getElementById('tripList').innerHTML=html;}
-function switchTab(tab){document.getElementById('panel-map').style.display=tab=='map'?'block':'none';document.getElementById('panel-list').style.display=tab=='list'?'block':'none';}
-function requestRide(){if(confirm('ترسل طلب؟')){alert('تم الإرسال ✅');if(navigator.vibrate)navigator.vibrate(200);}}
-function notifyDriver(){alert('تم تنبيه السائق 🔊');}
-(function(){if(localStorage.getItem('access_code')){document.getElementById('screen-lang').style.display='none';document.getElementById('screen-login').style.display='none';checkTrial();}})();
+let lang='en';
+const t={ar:{a:'طنجة - ابن بطوطة',routes:['مسار A - مدرسة → وسط المدينة','مسار B - ملابطا → ثانوية','مسار C - حي السلام → ابن بطوطة']},fr:{a:'Tanger - Ibn Battouta',routes:['Route A - École → Centre-ville','Route B - Malabata → Lycée','Route C - Hay Salam → Ibn Battouta']},en:{a:'Tanger - Ibn Battouta',routes:['Route A - École → Centre-ville','Route B - Malabata → Lycée','Route C - Hay Salam → Ibn Battouta']},es:{a:'Tanger - Ibn Battouta',routes:['Ruta A - Escuela → Centro','Ruta B - Malabata → Liceo','Ruta C - Hay Salam → Ibn Battouta']},ber:{a:'Tanger - Ibn Battouta',routes:['Abrid A - Asinan → Tamdint','Abrid B - Malabata → Asinan','Abrid C - Hay Salam → Ibn Battouta']}};
+function setLang(l){lang=l;document.querySelectorAll('.flag').forEach(f=>f.classList.remove('active'));document.getElementById('f-'+l).classList.add('active');document.getElementById('centerLabel').textContent='📍 '+t[l].a;renderTrips();}
+const trips=[{id:'B-142',lat:35.768,lng:-5.82,c:'#3b82f6',km:'1.2 km',plate:'9-ب 1346',status:'green'},{id:'B-207',lat:35.765,lng:-5.805,c:'#f97316',km:'2.8 km',plate:'7-د 7821',status:'orange'},{id:'B-055',lat:35.755,lng:-5.795,c:'#ef4444',km:'4.5 km',plate:'1-ج 9094',status:'red'},{id:'B-319',lat:35.75,lng:-5.835,c:'#3b82f6',km:'0.9 km',plate:'2-ب 4456',status:'blue'}];
+let map;function init(){map=L.map('map',{zoomControl:false}).setView([35.7595,-5.834],13.5);L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);trips.forEach(tr=>{const html=`<div style="--c:${tr.c}" class="bus-pin"><i class="fa-solid fa-bus"></i><span class="bus-label">${tr.id}</span></div>`;const icon=L.divIcon({className:'',html:html,iconSize:[34,44],iconAnchor:[17,44]});L.marker([tr.lat,tr.lng],{icon}).addTo(map);});renderTrips();}
+function renderTrips(){const c=document.getElementById('tripList');c.innerHTML=trips.slice(0,3).map((tr,i)=>{const name=t[lang]?.routes[i]||tr.id;const col=tr.status=='green'?'#22c55e':tr.status=='orange'?'#f97316':'#ef4444';const eta=tr.id=='B-142'?'6 min':tr.id=='B-207'?'12 min':'18 min';return `<div class="route-card" style="--c:${col}"><div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style="background:${col}"><i class="fa-solid fa-bus text-white"></i></div><div class="flex-1 min-w-0"><div class="flex justify-between gap-2"><div class="font-bold text-[13px] truncate">${name}</div><span class="text-[10px] font-bold px-2 py-1 rounded-full whitespace-nowrap border" style="color:${col};background:${col}22;border-color:${col}55">ETA ${eta} ⏱</span></div><div class="flex gap-3 mt-1"><span class="text-[11px] text-[#d4af37]">Plate: ${tr.plate}</span><span class="text-[11px] text-[#a1a1aa] bg-[#27272a] px-2 rounded-full">👤 ${tr.km}</span></div></div></div>`;}).join('');}
+function locateMe(){map.setView([35.7595,-5.834],14);}
+init();
 </script>
 </body>
-                                                                                             </html>
+</html>                                                                                             </html>
