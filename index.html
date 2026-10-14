@@ -1,1 +1,51 @@
 
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transpo Pro</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@700&display=swap');*{font-family:'Tajawal',sans-serif}.map-dot{width:18px;height:18px;border-radius:50%;border:3px solid white}.anim-pulse{animation:pulse 2s infinite}@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.2)}100%{transform:scale(1)}}</style>
+</head>
+<body class="bg-[#f6f7fb]">
+<div id="screen-lang" style="position:fixed;inset:0;z-index:100;background:#111;color:white;padding:24px;display:flex;flex-direction:column">
+<h1 style="font-size:36px;font-weight:900">Transpo<span style="color:#facc15">PRO</span></h1>
+<p style="color:#aaa">نقل مدرسي + حافلات - طنجة</p>
+<h2 style="font-size:20px;font-weight:700;margin:20px 0">اختر لغتك</h2>
+<button onclick="setLang('ar')" style="background:white;color:black;padding:16px;border-radius:16px;width:100%;margin-bottom:12px;font-weight:900">🇲🇦 العربية</button>
+<button onclick="setLang('fr')" style="background:#27272a;color:white;padding:16px;border-radius:16px;width:100%;margin-bottom:12px">🇫🇷 Français</button>
+<button onclick="setLang('en')" style="background:#27272a;color:white;padding:16px;border-radius:16px;width:100%;margin-bottom:12px">🇬🇧 English</button>
+<button onclick="setLang('es')" style="background:#27272a;color:white;padding:16px;border-radius:16px;width:100%;margin-bottom:12px">🇪🇸 Español</button>
+<button onclick="setLang('ber')" style="background:#27272a;color:white;padding:16px;border-radius:16px;width:100%">ⵣ ⵜⴰⵎⴰⵣⵉⵖⵜ</button>
+</div>
+<div id="screen-login" style="position:fixed;inset:0;z-index:90;background:white;padding:24px;display:none;flex-direction:column">
+<div style="margin-top:60px"><h2 style="font-size:28px;font-weight:900">دخل كود الدخول</h2><p style="color:#666">أي كود يخدم - 15 يوم فابور</p>
+<input id="accessCode" style="margin-top:32px;width:100%;padding:20px;border-radius:16px;border:2px solid #e4e4e7;text-align:center;font-size:24px;font-weight:900" placeholder="TRIAL-15">
+<button onclick="checkCode()" style="margin-top:24px;width:100%;background:black;color:white;padding:20px;border-radius:16px;font-weight:900;font-size:18px">دخول →</button>
+</div></div>
+<div id="screen-sub" style="position:fixed;inset:0;z-index:80;background:#f6f7fb;display:none;overflow:auto;padding:20px">
+<div style="background:black;color:white;padding:20px;border-radius:24px"><h3 style="font-weight:900">⏳ فترتك التجريبية</h3><p id="trialDays" style="color:#facc15">باقي 15 يوم</p></div>
+<h2 style="font-size:22px;font-weight:900;margin:16px 0">اختار الاشتراك</h2>
+<button onclick="subscribe('rider')" style="width:100%;background:black;color:white;padding:16px;border-radius:12px;font-weight:700;margin-bottom:12px">راكب - 10 د.م / شهر</button>
+<button onclick="subscribe('driver')" style="width:100%;background:#facc15;color:black;padding:16px;border-radius:12px;font-weight:700;margin-bottom:12px">سائق - 13 د.م / شهر</button>
+<button onclick="continueTrial()" style="width:100%;color:#777;padding:12px">كمل فابور دابا</button>
+</div>
+<div id="app" style="display:none;height:100vh;flex-direction:column"><div style="background:black;color:white;padding:12px;display:flex;justify-content:space-between"><b>راكب - Transpo</b><span style="background:#facc15;color:black;font-size:10px;padding:2px 8px;border-radius:999px">TRIAL</span></div><div id="map" style="flex:1"></div><div style="background:white;border-radius:24px 24px 0 0;margin-top:-24px;z-index:10;max-height:55vh;overflow:auto"><div style="display:flex;gap:8px;padding:16px"><button onclick="switchTab('map')" style="flex:1;background:black;color:white;padding:10px;border-radius:12px">🗺 خريطة</button><button onclick="switchTab('list')" style="flex:1;background:#eee;padding:10px;border-radius:12px">📋 لائحة</button><button onclick="requestRide()" style="flex:1;background:#facc15;padding:10px;border-radius:12px">📍 طلب</button></div><div id="panel-map"><div id="tripList" style="padding:0 16px 16px;display:grid;gap:8px"></div></div><div id="panel-list" style="display:none;padding:16px"><div style="background:#fafafa;padding:16px;border-radius:16px"><b>سائق: محمد - حافلة 12</b><br><span style="font-size:12px">لوحة: 12345</span><div style="display:flex;gap:8px;margin-top:12px"><button onclick="notifyDriver()" style="flex:1;background:black;color:white;padding:12px;border-radius:12px">🔔 نبه السائق</button></div></div></div></div></div>
+<script>
+function setLang(l){localStorage.setItem('lang',l);document.getElementById('screen-lang').style.display='none';document.getElementById('screen-login').style.display='flex';}
+function checkCode(){let c=document.getElementById('accessCode').value;if(!c){alert('دخل كود');return;}localStorage.setItem('access_code',c);if(!localStorage.getItem('trial_start'))localStorage.setItem('trial_start',Date.now());document.getElementById('screen-login').style.display='none';checkTrial();}
+function checkTrial(){let start=parseInt(localStorage.getItem('trial_start')||Date.now());let daysLeft=15-Math.floor((Date.now()-start)/86400000);if(daysLeft<=0){document.getElementById('screen-sub').style.display='block';}else{document.getElementById('trialDays').textContent='باقي '+daysLeft+' يوم';startApp();}}
+function subscribe(p){localStorage.setItem('plan',p);alert('تم ✅');startApp();}
+function continueTrial(){startApp();}
+let map;function startApp(){document.getElementById('screen-sub').style.display='none';document.getElementById('screen-lang').style.display='none';document.getElementById('screen-login').style.display='none';document.getElementById('app').style.display='flex';setTimeout(initMap,500);}
+function initMap(){if(map)return;map=L.map('map',{zoomControl:false}).setView([35.7595,-5.834],13);L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);const trips=[{id:1,lat:35.76,lng:-5.82,color:'#10b981',name:'مدرسة النور - خط 1',plate:'A 1234',driver:'أحمد',eta:'3 د',dist:'0.8km'},{id:2,lat:35.77,lng:-5.85,color:'#f59e0b',name:'الحي الجامعي',plate:'B 5678',driver:'حسن',eta:'7 د',dist:'2.1km'},{id:3,lat:35.74,lng:-5.81,color:'#ef4444',name:'فري زون عمال',plate:'C 9012',driver:'كريم',eta:'تأخر',dist:'1.5km'},{id:4,lat:35.75,lng:-5.80,color:'#3b82f6',name:'طاكسي كبير',plate:'D 3456',driver:'يوسف',eta:'1 د',dist:'0.3km'}];let html='';trips.forEach(tr=>{let icon=L.divIcon({className:'',html:`<div style="background:${tr.color}" class="map-dot anim-pulse"></div>`});L.marker([tr.lat,tr.lng],{icon}).addTo(map).bindPopup(tr.name);html+=`<div style="background:white;padding:12px;border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1);display:flex;justify-content:space-between;border-left:5px solid ${tr.color}"><div><b>${tr.name}</b><br><span style="font-size:11px;color:#777">${tr.plate} • ${tr.driver} • ${tr.dist} • ${tr.eta}</span></div><span style="font-size:11px;background:${tr.color}20;padding:4px 8px;border-radius:999px;height:fit-content">${tr.eta}</span></div>`;});document.getElementById('tripList').innerHTML=html;}
+function switchTab(tab){document.getElementById('panel-map').style.display=tab=='map'?'block':'none';document.getElementById('panel-list').style.display=tab=='list'?'block':'none';}
+function requestRide(){if(confirm('ترسل طلب؟')){alert('تم الإرسال ✅');if(navigator.vibrate)navigator.vibrate(200);}}
+function notifyDriver(){alert('تم تنبيه السائق 🔊');}
+(function(){if(localStorage.getItem('access_code')){document.getElementById('screen-lang').style.display='none';document.getElementById('screen-login').style.display='none';checkTrial();}})();
+</script>
+</body>
+                                                                                             </html>
