@@ -1,155 +1,118 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Transpo PRO Tanger V5 - 5 Langues</title>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;800&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--gold:#FFC107;--gold2:#FF9800;--dark:#0A0A0A;--card:#1C1C1C;--card2:#252525;--border:#2E2E2E;--text:#fff;--muted:#8A8A8A}
-body{font-family:'Tajawal',sans-serif;background:var(--dark);color:var(--text);padding-bottom:110px}
-.hidden{display:none!important}
-.header{position:sticky;top:0;z-index:99;background:rgba(10,10,10,.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.logo{display:flex;align-items:center;gap:8px;cursor:pointer}
-.logo-i{width:38px;height:38px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:11px;display:flex;align-items:center;justify-content:center;color:#000;font-weight:900}
-.logo-t{font-weight:800;font-size:17px}.logo-t span{color:var(--gold)}
-.langs{display:flex;gap:5px;background:var(--card2);border-radius:12px;padding:4px;border:1px solid var(--border);overflow-x:auto}
-.langs button{background:transparent;border:none;padding:6px 8px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:800;display:flex;align-items:center;gap:4px;transition:.2s;border:1px solid transparent}
-.langs button.active{background:var(--gold);color:#000;border-color:var(--gold);transform:scale(1.05)}
-.btn-home{background:var(--card2);border:1px solid var(--border);color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700}
-.welcome{min-height:90vh;display:flex;align-items:center;justify-content:center;padding:16px}
-.w-card{background:linear-gradient(180deg,#1E1E1E,#111);border:1px solid var(--border);border-radius:26px;padding:22px 16px;width:100%;max-width:460px;text-align:center}
-.w-logo{width:80px;height:80px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:20px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:900;color:#000}
-.badge-code{background:var(--card2);border:1px dashed var(--gold);border-radius:12px;padding:10px;margin:12px 0;display:flex;justify-content:space-between;align-items:center}
-.badge-code b{color:var(--gold);font-size:16px;letter-spacing:1px}
-.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;border:none;padding:13px;border-radius:14px;font-weight:800;cursor:pointer;width:100%}
-.btn-outline{background:transparent;border:1px solid var(--border);color:#fff;padding:12px;border-radius:14px;font-weight:700;cursor:pointer;width:100%;margin-top:8px}
-.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
-.role-btn{background:var(--card2);border:1.5px solid var(--border);border-radius:16px;padding:14px 6px;cursor:pointer}
-.dashboard{max-width:500px;margin:0 auto;padding:12px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:12px}
-.card-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;border:none}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.input{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:12px;color:#fff;margin-bottom:8px}
-.range-row{display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--card2);border-radius:12px;margin-bottom:6px;border:1px solid var(--border);font-size:13px}
-.opts{display:flex;gap:5px}.opts button{background:#333;border:1px solid #444;color:#fff;padding:5px 8px;border-radius:8px;cursor:pointer;font-size:11px;font-weight:700}
-.opts button.active{background:var(--gold);color:#000}
-.slider{width:100%;accent-color:var(--gold)}
-.p-item{display:flex;gap:8px;align-items:center;padding:10px;background:var(--card2);border-radius:12px;margin-bottom:6px}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;background:rgba(18,18,18,.98);backdrop-filter:blur(18px);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0 18px;z-index:100;border-radius:22px 22px 0 0}
-.nav-it{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:10px;font-weight:700}
-.nav-it.active{color:var(--gold)}.nav-it.ic{font-size:20px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:10px}
-.nav-it.active.ic{background:rgba(255,193,7,.15)}
-.toggle{width:44px;height:24px;background:#333;border-radius:20px;position:relative;cursor:pointer}.toggle.on{background:var(--gold)}.toggle::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.2s}.toggle.on::after{left:23px}
-</style>
-</head>
-<body>
-<div class="header">
-  <div class="logo" onclick="goHome()"><div class="logo-i">T</div><div class="logo-t">Transpo <span>PRO</span></div></div>
-  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-    <div class="langs" id="langBar">
-      <button class="active" onclick="setLang('ar')" id="lb-ar">🇲🇦 AR</button>
-      <button onclick="setLang('fr')" id="lb-fr">🇫🇷 FR</button>
-      <button onclick="setLang('en')" id="lb-en">🇬🇧 EN</button>
-      <button onclick="setLang('es')" id="lb-es">🇪🇸 ES</button>
-      <button onclick="setLang('de')" id="lb-de">🇩🇪 DE</button>
-    </div>
-    <button class="btn-home" onclick="goHome()">🏠 Home</button>
-  </div>
-</div>
-<div id="p-home" class="welcome">
-  <div class="w-card">
-    <div class="w-logo">T</div>
-    <h1 id="h-title" style="font-size:24px;font-weight:800">أهلا وسهلا في Transpo PRO</h1>
-    <p id="h-sub" style="color:var(--muted);margin:8px 0;line-height:1.5;font-size:13px">نظام النقل الذكي في طنجة - 5 لغات - سريع، آمن، واحترافي</p>
-    <div class="badge-code"><div style="text-align:right"><div style="font-size:10px;color:var(--muted)" id="code-label">كود التطبيق - Code App</div><b>TNG-2026-X9</b></div><button onclick="copyCode()" style="background:var(--gold);border:none;padding:6px 10px;border-radius:8px;font-weight:800;cursor:pointer;color:#000" id="copyBtn">نسخ</button></div>
-    <div class="role-grid">
-      <div class="role-btn" onclick="openDriver()"><div style="font-size:24px">🚐</div><b id="h-d">سائق</b><div style="font-size:10px;color:var(--muted)">Driver</div></div>
-      <div class="role-btn" onclick="openPassenger()"><div style="font-size:24px">🧍</div><b id="h-p">راكب</b><div style="font-size:10px;color:var(--muted)">Passager</div></div>
-    </div>
-    <button class="btn-gold" onclick="openDriver()" id="h-start">ابدأ الآن - Démarrer</button>
-    <button class="btn-outline" onclick="shareApp()" id="h-share">📤 مشاركة التطبيق - Partager l'app</button>
-    <div style="margin-top:10px;font-size:10px;color:var(--muted)" id="h-ver">V5 • 5 لغات بالراية • طنجة 2026</div>
-  </div>
-</div>
-<div id="p-driver" class="dashboard hidden">
-  <div class="card card-gold"><div style="display:flex;justify-content:space-between"><div style="display:flex;gap:6px"><button onclick="goHome()" style="background:rgba(0,0,0,.18);border:none;width:28px;height:28px;border-radius:8px">←</button><b id="d-title">لوحة السائق</b></div><span style="background:#000;color:var(--gold);padding:4px 8px;border-radius:10px;font-size:10px">● ONLINE B-142</span></div><div style="font-size:11px;margin-top:6px">Ibn Battouta → Hay Salam → Centre Ville • 6.2km</div></div>
-  <div id="d-home"><div class="grid2"><div class="card" style="text-align:center;cursor:pointer" onclick="switchD('routes')">🗺️<br><b id="d-r1">المسارات</b></div><div class="card" style="text-align:center;cursor:pointer" onclick="switchD('map')">📍<br><b id="d-r2">الخريطة</b></div><div class="card" style="text-align:center;cursor:pointer" onclick="switchD('pass')">👥<br><b id="d-r3">الركاب</b></div><div class="card" style="text-align:center;cursor:pointer" onclick="switchD('sub')">💳<br><b id="d-r4">اشتراكي</b></div></div></div>
-  <div id="d-routes" class="hidden"><div class="card"><div style="display:flex;justify-content:space-between"><b>🛣️ المسارات + الركاب</b><button class="btn-home" onclick="switchD('home')">رجوع</button></div><div id="routeList" style="margin-top:10px"></div></div></div>
-  <div id="d-map" class="hidden"><div class="card"><b>📍 الخريطة المباشرة</b><button class="btn-home" onclick="switchD('home')" style="float:left">رجوع</button><div style="background:#222;border-radius:12px;padding:30px;margin-top:10px;text-align:center;color:var(--muted)">Google Maps Live<br>B-142 • 3 min</div></div></div>
-  <div id="d-pass" class="hidden"><div class="card"><div style="display:flex;justify-content:space-between"><b>👥 لائحة الركاب</b><button class="btn-home" onclick="switchD('home')">رجوع</button></div><input class="input" id="searchD" placeholder="بحث..." oninput="renderD()"><div id="plistD"></div></div></div>
-  <div id="d-sub" class="hidden"><div class="card"><b>💳 اشتراكي</b><button class="btn-home" onclick="switchD('home')" style="float:left">رجوع</button><div style="background:linear-gradient(135deg,#FFC107,#FF9800);color:#000;border-radius:14px;padding:14px;margin-top:10px">PRO Plan • 29 يوم متبقي</div></div></div>
-  <div id="d-settings" class="hidden"><div class="card">
-    <div style="display:flex;justify-content:space-between"><b id="ds-title">⚙️ إعدادات الشيفور</b><button class="btn-home" onclick="switchD('home')">رجوع</button></div>
-    <div style="margin-top:12px">
-      <h4 style="color:var(--gold);font-size:13px;margin:10px 0 6px;border-bottom:1px solid var(--border);padding-bottom:6px">👤 معلوماتي</h4>
-      <input class="input" value="أحمد العلوي" placeholder="الاسم"><input class="input" value="06 12 34 56 78" placeholder="الهاتف"><input class="input" value="B-142" placeholder="الحافلة"><input class="input" value="9-ب-1346" placeholder="الماتريكيل"><input class="input" value="24" placeholder="المقاعد">
-      <h4 style="color:var(--gold);font-size:13px;margin:12px 0 6px;border-bottom:1px solid var(--border);padding-bottom:6px">🔔 إشعارات - قبل الوصول</h4>
-      <div class="range-row"><span>⏰ بالدقائق</span><div class="opts"><button class="active">5 دق</button><button>10 دق</button><button>15 دق</button></div></div>
-      <div class="range-row"><span>📏 بالمسافة</span><div class="opts"><button class="active">1 كلم</button><button>5 كلم</button><button>10 كلم</button></div></div>
-      <h4 style="color:var(--gold);font-size:13px;margin:12px 0 6px;border-bottom:1px solid var(--border);padding-bottom:6px">🔊 الصوت - Volume من - إلى +</h4>
-      <div style="display:flex;align-items:center;gap:8px;background:var(--card2);padding:10px;border-radius:10px;border:1px solid var(--border)"><span>-</span><input type="range" min="0" max="100" value="70" class="slider" oninput="document.getElementById('vol').innerText=this.value+'%'"><span>+</span><b id="vol" style="color:var(--gold)">70%</b></div>
-      <div style="display:flex;justify-content:space-between;padding:10px 0"><span>📍 مشاركة الموقع</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-      <button class="btn-gold" style="margin-top:10px" onclick="alert('✅ تم الحفظ')">💾 حفظ الإعدادات</button>
-    </div>
-  </div></div>
-</div>
-<div id="p-pass" class="dashboard hidden">
-  <div class="card card-gold"><div style="display:flex;justify-content:space-between"><div style="display:flex;gap:6px"><button onclick="goHome()" style="background:rgba(0,0,0,.18);border:none;width:28px;height:28px;border-radius:8px">←</button><b>راكب</b></div><span style="background:#000;color:var(--gold);padding:4px 8px;border-radius:10px;font-size:10px">Hay Salam</span></div></div>
-  <div id="pa-home"><div class="grid2"><div class="card" style="text-align:center;cursor:pointer" onclick="switchP('map')">📍<br><b>الخريطة</b></div><div class="card" style="text-align:center;cursor:pointer" onclick="switchP('routes')">🗺️<br><b>مسارات</b></div><div class="card" style="text-align:center;cursor:pointer" onclick="switchP('sub')">💳<br><b>اشتراكي</b></div><div class="card" style="text-align:center;cursor:pointer" onclick="switchP('settings')">⚙️<br><b>إعدادات</b></div></div></div>
-  <div id="pa-map" class="hidden"><div class="card"><b>📍 الخريطة</b><button class="btn-home" onclick="switchP('home')" style="float:left">رجوع</button><div style="background:#222;border-radius:12px;padding:30px;margin-top:10px;text-align:center;color:var(--muted)">تتبع مباشر</div></div></div>
-  <div id="pa-routes" class="hidden"><div class="card"><b>🛣️ مساراتي</b><button class="btn-home" onclick="switchP('home')" style="float:left">رجوع</button><div style="margin-top:10px"><div class="p-item"><div style="flex:1"><b>Hay Salam → Centre Ville</b><div style="font-size:11px;color:var(--muted)">اليوم 08:15 B-142</div></div>● حاضر</div></div></div></div>
-  <div id="pa-sub" class="hidden"><div class="card"><b>💳 اشتراكي</b><button class="btn-home" onclick="switchP('home')" style="float:left">رجوع</button><div style="background:linear-gradient(135deg,#FFC107,#FF9800);color:#000;border-radius:14px;padding:14px;margin-top:10px">Passager Mensuel • 300 درهم</div></div></div>
-  <div id="pa-settings" class="hidden"><div class="card"><b>⚙️ إعدادات</b><button class="btn-home" onclick="switchP('home')" style="float:left">رجوع</button><input class="input" value="يوسف" placeholder="الاسم"><input class="input" value="06 12 34 56 78" placeholder="الهاتف"><button class="btn-gold" style="margin-top:8px">حفظ</button></div></div>
-</div>
-<div id="nav-driver" class="bottom-nav hidden">
-  <button class="nav-it active" id="nd-home" onclick="switchD('home')"><span class="ic">🏠</span><span>الرئيسية</span></button>
-  <button class="nav-it" onclick="switchD('routes')"><span class="ic">🗺️</span><span>المسارات</span></button>
-  <button class="nav-it" onclick="switchD('map')"><span class="ic">📍</span><span>الخريطة</span></button>
-  <button class="nav-it" onclick="switchD('sub')"><span class="ic">💳</span><span>اشتراكي</span></button>
-  <button class="nav-it" onclick="switchD('settings')"><span class="ic">⚙️</span><span>إعدادات</span></button>
-</div>
-<div id="nav-pass" class="bottom-nav hidden">
-  <button class="nav-it active" onclick="switchP('home')"><span class="ic">🏠</span><span>الرئيسية</span></button>
-  <button class="nav-it" onclick="switchP('routes')"><span class="ic">🗺️</span><span>مسارات</span></button>
-  <button class="nav-it" onclick="switchP('sub')"><span class="ic">💳</span><span>اشتراكي</span></button>
-  <button class="nav-it" onclick="switchP('map')"><span class="ic">📍</span><span>الخريطة</span></button>
-  <button class="nav-it" onclick="switchP('settings')"><span class="ic">⚙️</span><span>إعدادات</span></button>
-</div>
-<script>
-const passengers=[{name:'Youssef Alami',stop:'Hay Salam',status:'present'},{name:'Fatima Zahra',stop:'Malabata',status:'present'},{name:'Ahmed Bennis',stop:'Centre Ville',status:'present'}];
-const i18n={
- ar:{title:'أهلا وسهلا في Transpo PRO',sub:'نظام النقل الذكي في طنجة - 5 لغات - سريع، آمن، واحترافي',driver:'سائق',pass:'راكب',start:'ابدأ الآن',share:'📤 مشاركة التطبيق',code:'كود التطبيق',copy:'نسخ',ver:'V5 • 5 لغات بالراية • طنجة 2026'},
- fr:{title:'Bienvenue sur Transpo PRO',sub:'Système intelligent Tanger - 5 langues - Rapide et sûr',driver:'Conducteur',pass:'Passager',start:'Commencer',share:'📤 Partager l\'app',code:'Code App',copy:'Copier',ver:'V5 • 5 langues avec drapeaux • Tanger 2026'},
- en:{title:'Welcome to Transpo PRO',sub:'Smart Transport Tanger - 5 languages - Fast & safe',driver:'Driver',pass:'Passenger',start:'Start Now',share:'📤 Share App',code:'App Code',copy:'Copy',ver:'V5 • 5 languages with flags • Tanger 2026'},
- es:{title:'Bienvenido a Transpo PRO',sub:'Transporte inteligente Tánger - 5 idiomas - Rápido y seguro',driver:'Conductor',pass:'Pasajero',start:'Empezar',share:'📤 Compartir app',code:'Código App',copy:'Copiar',ver:'V5 • 5 idiomas con banderas • Tánger 2026'},
- de:{title:'Willkommen bei Transpo PRO',sub:'Intelligenter Transport Tanger - 5 Sprachen - Schnell & sicher',driver:'Fahrer',pass:'Passagier',start:'Starten',share:'📤 App teilen',code:'App Code',copy:'Kopieren',ver:'V5 • 5 Sprachen mit Flaggen • Tanger 2026'}
-};
-function setLang(l){
- document.querySelectorAll('.langs button').forEach(b=>b.classList.remove('active'));
- document.getElementById('lb-'+l).classList.add('active');
- const t=i18n[l];
- document.getElementById('h-title').innerText=t.title;
- document.getElementById('h-sub').innerText=t.sub;
- document.getElementById('h-d').innerText=t.driver;
- document.getElementById('h-p').innerText=t.pass;
- document.getElementById('h-start').innerText=t.start;
- document.getElementById('h-share').innerText=t.share;
- document.getElementById('code-label').innerText=t.code;
- document.getElementById('copyBtn').innerText=t.copy;
- document.getElementById('h-ver').innerText=t.ver;
+{
+  "name": "trans-pro",
+  "version": "2.0.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "build:apk": "eas build --platform android --profile preview"
+  },
+  "dependencies": {
+    "expo": "~51.0.0",
+    "expo-router": "~3.5.0",
+    "expo-location": "~17.5.0",
+    "expo-notifications": "~0.28.0",
+    "expo-sms": "~12.0.0",
+    "expo-linking": "~6.3.0",
+    "expo-audio": "~0.10.0",
+    "expo-background-fetch": "~12.1.0",
+    "expo-task-manager": "~11.8.0",
+    "react-native-maps": "1.14.0",
+    "react-native-reanimated": "~3.10.0",
+    "@react-native-async-storage/async-storage": "1.23.1",
+    "lucide-react-native": "^0.400.0"
+  }
+}{
+  "expo": {
+    "name": "Trans-pro",
+    "slug": "trans-pro",
+    "scheme": "transpro",
+    "icon": "./assets/logo-trans-pro.png",
+    "android": {
+      "package": "com.transpro.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "SEND_SMS",
+        "RECEIVE_SMS",
+        "NOTIFICATIONS",
+        "android.permission.FOREGROUND_SERVICE"
+      ]
+    },
+    "plugins": [
+      ["expo-location", { "locationAlwaysAndWhenInUsePermission": "Trans-pro كيحتاج GPS باش يعلمك فين السائق" }],
+      ["expo-notifications", { "sounds": ["./assets/notification.wav"] }]
+    ]
+  }
+}{
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "android": { "buildType": "apk" }
+    }
+  }
+}import * as Location from 'expo-location';
+import * as Notifications from 'expo-notifications';
+import * as SMS from 'expo-sms';
+import { Linking } from 'react-native';
+
+// 1. GPS - تتبع السائق لحظة بلحظة
+export async function startGPSTracking() {
+  await Location.requestForegroundPermissionsAsync();
+  await Location.requestBackgroundPermissionsAsync();
+  return await Location.watchPositionAsync(
+    { accuracy: Location.Accuracy.High, timeInterval: 5000, distanceInterval: 10 },
+    (loc) => {
+      console.log("موقع جديد:", loc.coords);
+      // هنا تصيفط الموقع لـ Firebase/Supabase
+      sendPushToPassenger(loc.coords);
+    }
+  );
 }
-function goHome(){document.getElementById('p-home').classList.remove('hidden');document.getElementById('p-driver').classList.add('hidden');document.getElementById('p-pass').classList.add('hidden');document.getElementById('nav-driver').classList.add('hidden');document.getElementById('nav-pass').classList.add('hidden');window.scrollTo({top:0,behavior:'smooth'});}
-function openDriver(){document.getElementById('p-home').classList.add('hidden');document.getElementById('p-driver').classList.remove('hidden');document.getElementById('nav-driver').classList.remove('hidden');document.getElementById('nav-pass').classList.add('hidden');switchD('home');renderD();renderRoutes();}
-function openPassenger(){document.getElementById('p-home').classList.add('hidden');document.getElementById('p-pass').classList.remove('hidden');document.getElementById('nav-pass').classList.remove('hidden');document.getElementById('nav-driver').classList.add('hidden');switchP('home');}
-function switchD(tab){['home','routes','map','pass','sub','settings'].forEach(t=>document.getElementById('d-'+t)?.classList.add('hidden'));document.getElementById('d-'+tab)?.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'});}
-function switchP(tab){['home','routes','map','sub','settings'].forEach(t=>document.getElementById('pa-'+t)?.classList.add('hidden'));document.getElementById('pa-'+tab)?.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'});}
-function renderD(){const q=(document.getElementById('searchD')?.value||'').toLowerCase();const list=document.getElementById('plistD');if(!list)return;list.innerHTML='';passengers.filter(p=>p.name.toLowerCase().includes(q)).forEach(p=>{list.innerHTML+=`<div class="p-item"><div style="width:36px;height:36px;background:#333;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700">${p.name[0]}</div><div style="flex:1"><b style="font-size:12px">${p.name}</b><div style="font-size:10px;color:#8A8A8A">${p.stop}</div></div></div>`})}
-function renderRoutes(){const el=document.getElementById('routeList');if(!el)return;el.innerHTML='';passengers.forEach(p=>{el.innerHTML+=`<div class="p-item"><div style="flex:1"><b>📍 ${p.stop} → Centre Ville</b><br><span style="font-size:11px;color:#8A8A8A">${p.name}</span></div><span style="background:var(--gold);color:#000;padding:3px 7px;border-radius:7px;font-size:10px">1.2km</span></div>`})}
-function copyCode(){navigator.clipboard.writeText('TNG-2026-X9');alert('تم النسخ ✅');}
-function shareApp(){if(navigator.share){navigator.share({title:'Transpo PRO',url:location.href})}else{alert(location.href)}}
-document.querySelectorAll('.range-row.opts button').forEach(b=>{b.addEventListener('click',function(){this.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('active'));this.classList.add('active')})});
-</script>
-</body>
-</html>
+
+// 2. PUSH - كينبه الراكب ملي يقرب السائق
+export async function sendPushToPassenger(coords: any) {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "Trans-pro - السائق قريب!",
+      body: `السائق على بعد 2 دقائق منك - وجد فطورك على خاطرك`,
+      sound: 'notification.wav', // صوت رسمي او من الهاتف
+      data: { coords }
+    },
+    trigger: null
+  });
+}
+
+// 3. SMS - إلا ما كانش انترنت
+export async function sendSMSAlert(phone: string, message: string) {
+  const isAvailable = await SMS.isAvailableAsync();
+  if (isAvailable) {
+    await SMS.sendSMSAsync([phone], message);
+  }
+}
+
+// 4. WHATSAPP - تواصل مباشر
+export function openWhatsApp(phone: string, msg: string) {
+  const url = `whatsapp://send?phone=${phone}&text=${encodeURIComponent(msg)}`;
+  Linking.openURL(url);
+}
+
+// 5. تسجيل مسار جديد وهو سايق + تبليغ عن حادث
+export let currentRoute: any[] = [];
+export function addPointToRoute(coord: any) {
+  currentRoute.push(coord);
+}
+export function reportAccident(reason: string) {
+  Notifications.scheduleNotificationAsync({
+    content: {
+      title: "⚠️ حادث في الطريق",
+      body: `الشيفور بلغ عن: ${reason} - سيتم تحويل المسار`,
+    },
+    trigger: null
+  });
+  sendSMSAlert("06xxxxxx", `حادث: ${reason}`);
+}npm install
+npx expo install
+npm install -g eas-cli
+eas login
+eas build --platform android --profile preview
