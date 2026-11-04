@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "TOBIS",
+    "slug": "tobis-transit",
+    "version": "1.0.0",
+    "scheme": "tobis",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#082c56",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ma.tobis.transit",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "TOBIS utilise votre position pour afficher le bus et permettre au chauffeur de partager son trajet.",
+        "UIBackgroundModes": ["location", "remote-notification"]
+      }
+    },
+    "android": {
+      "package": "ma.tobis.transit",
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION", "ACCESS_BACKGROUND_LOCATION", "FOREGROUND_SERVICE", "FOREGROUND_SERVICE_LOCATION", "POST_NOTIFICATIONS"],
+      "adaptiveIcon": {
+        "backgroundColor": "#082c56"
+      }
+    },
+    "plugins": [
+      ["expo-location", {
+        "locationWhenInUsePermission": "Autoriser TOBIS à utiliser votre position pour suivre les bus.",
+        "locationAlwaysAndWhenInUsePermission": "Autoriser TOBIS à partager la position du chauffeur pendant le trajet.",
+        "isAndroidBackgroundLocationEnabled": true,
+        "isAndroidForegroundServiceEnabled": true
+      }],
+      ["expo-notifications", {
+        "sounds": []
+      }],
+      ["react-native-maps", {
+        "androidGoogleMapsApiKey": ""
+      }]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
