@@ -1,0 +1,18 @@
+{
+  "name": "tobis-functions",
+  "private": true,
+  "engines": { "node": "20" },
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "lint": "tsc --noEmit",
+    "deploy": "npm run build && firebase deploy --only functions,firestore:rules,firestore:indexes"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.2",
+    "firebase-functions": "^6.3.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

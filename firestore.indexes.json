@@ -1,0 +1,22 @@
+{
+  "rules_version": "2",
+  "indexes": [
+    {
+      "collectionGroup": "passengerSubscriptions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "nextSendAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "liveTrips",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "lineId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

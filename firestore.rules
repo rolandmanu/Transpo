@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function approvedDriver() { return signedIn() && request.auth.token.driver == true; }
+    function admin() { return signedIn() && request.auth.token.admin == true; }
+
+    // Public, read-only catalogue; routes and stops must be entered by trusted admins.
+    match /routes/{routeId} {
+      allow read: if true;
+      allow write: if admin();
+    }
+
+    // Live location is public because the passenger map is public by product requirement.
+    // Only custom-claim drivers may create their own trip or update its GPS/status.
+    match /liveTrips/{tripId} {
+      allow read: if resource.data.status == 'active';
+      allow create: if approvedDriver()
+        && request.resource.data.driverUid == request.auth.uid
+        && request.resource.data.status == 'active'
+        && request.resource.data.city is string
+        && request.resource.data.lineId is string
+        && request.resource.data.vehicle is string
+        && request.resource.data.location == null;
+      allow update: if approvedDriver()
+        && resource.data.driverUid == request.auth.uid
+        && request.resource.data.driverUid == request.auth.uid
+        && request.resource.data.city == resource.data.city
+        && request.resource.data.lineId == resource.data.lineId
+        && request.resource.data.vehicle == resource.data.vehicle
+        && request.resource.data.status in ['active', 'ended'];
+      allow delete: if false;
+    }
+
+    // Passenger phone numbers, OTP digests and opt-out tokens are backend-only PII.
+    match /passengerSubscriptions/{subscriptionId} { allow read, write: if false; }
+    match /subscriptionThrottle/{phoneHash} { allow read, write: if false; }
+    match /users/{uid} { allow read, write: if admin() && uid != request.auth.uid; }
+    match /{document=**} { allow read, write: if false; }
+  }
+}
